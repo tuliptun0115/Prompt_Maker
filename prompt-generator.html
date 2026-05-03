@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<title>My Prompt Maker — 指令產生器</title>
+<style>
+:root {
+  --bg:#0f1117;--surface:#1a1d27;--surface2:#222536;--border:#2e3148;
+  --accent:#6c63ff;--accent-glow:rgba(108,99,255,.15);--accent2:#00d4aa;
+  --text:#e8eaf0;--text-muted:#8b90a7;--text-dim:#555a72;
+  --success:#00c896;--warning:#f5a623;--danger:#ff5f5f;
+  --radius:10px;--radius-sm:6px;--t:.2s ease;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;height:56px;background:rgba(15,17,23,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;z-index:100}
+.nav-logo{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.nav-logo .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.nav-tabs{display:flex;gap:4px;margin-left:auto}
+.nav-tab{padding:6px 16px;border-radius:var(--radius-sm);border:none;background:transparent;color:var(--text-muted);font-size:13px;cursor:pointer;transition:var(--t)}
+.nav-tab:hover{color:var(--text);background:var(--surface)}
+.nav-tab.active{color:var(--text);background:var(--surface2)}
+
+/* PAGES */
+.page{display:none;padding-top:56px}
+.page.active{display:block}
+
+/* GENERATOR LAYOUT */
+.gen-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);padding:0 24px;margin-top:0;background:var(--surface)}
+.gen-tab{padding:12px 20px;border:none;background:transparent;color:var(--text-muted);font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;transition:var(--t);margin-bottom:-1px}
+.gen-tab:hover{color:var(--text)}
+.gen-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+.gen-panel{display:none}
+.gen-panel.active{display:grid;grid-template-columns:360px 1fr;min-height:calc(100vh - 100px)}
+
+/* SIDEBAR */
+.sidebar{border-right:1px solid var(--border);padding:20px;overflow-y:auto;height:calc(100vh - 100px);position:sticky;top:100px}
+.section-label{font-size:11px;font-weight:600;color:var(--text-dim);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:12px}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:12px;color:var(--text-muted);margin-bottom:6px}
+select,input[type=text],textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;padding:9px 12px;outline:none;transition:var(--t);font-family:inherit}
+select:focus,input[type=text]:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+select option{background:var(--surface2)}
+textarea{resize:vertical;min-height:80px}
+select:disabled{opacity:.4;cursor:not-allowed}
+
+/* DYNAMIC CONTEXT FIELDS */
+#ctx-fields{display:flex;flex-direction:column;gap:10px}
+.ctx-field label{color:var(--accent2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px}
+
+/* CHIPS */
+.chip-row{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);font-size:12px;cursor:pointer;transition:var(--t);user-select:none}
+.chip.active{border-color:var(--accent2);background:rgba(0,212,170,.1);color:var(--accent2)}
+
+/* CATEGORY GRID (visual tab) */
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cat-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer;transition:var(--t);user-select:none}
+.cat-item:hover,.cat-item.on{border-color:var(--accent);background:var(--accent-glow)}
+.cat-box{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:var(--t)}
+.cat-item.on .cat-box{background:var(--accent);border-color:var(--accent)}
+.cat-box::after{content:'';display:none;width:5px;height:9px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px)}
+.cat-item.on .cat-box::after{display:block}
+.cat-lbl{font-size:12px;color:var(--text-muted)}
+.cat-lbl strong{display:block;font-size:11px;font-weight:600;color:var(--text)}
+
+/* BUTTONS */
+.btn-primary{width:100%;padding:12px;border-radius:var(--radius);border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:var(--t);letter-spacing:.3px}
+.btn-primary:hover{background:#7c74ff;transform:translateY(-1px);box-shadow:0 4px 20px rgba(108,99,255,.4)}
+.btn-primary:active{transform:translateY(0)}
+.btn-ghost{width:100%;padding:9px;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text-muted);font-size:12px;cursor:pointer;transition:var(--t);margin-top:8px}
+.btn-ghost:hover{border-color:var(--danger);color:var(--danger)}
+
+/* OUTPUT */
+.output-panel{padding:28px;overflow-y:auto}
+.out-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.out-title{font-size:17px;font-weight:700}
+.btn-copy{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text-muted);font-size:12px;cursor:pointer;transition:var(--t)}
+.btn-copy:hover{border-color:var(--accent2);color:var(--accent2)}
+.btn-copy.ok{border-color:var(--success);color:var(--success)}
+.out-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;font-family:'Consolas','Courier New',monospace;font-size:13px;line-height:1.8;white-space:pre-wrap;word-break:break-word;min-height:360px}
+.out-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:360px;color:var(--text-dim);text-align:center;gap:10px}
+.out-empty .ico{font-size:36px;opacity:.3}
+
+/* PTCF BADGE */
+.ptcf-row{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.ptcf-badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.p-badge{background:rgba(108,99,255,.15);color:#9d97ff;border:1px solid rgba(108,99,255,.3)}
+.t-badge{background:rgba(0,212,170,.12);color:#00d4aa;border:1px solid rgba(0,212,170,.3)}
+.c-badge{background:rgba(245,166,35,.12);color:#f5a623;border:1px solid rgba(245,166,35,.3)}
+.f-badge{background:rgba(255,95,95,.12);color:#ff8585;border:1px solid rgba(255,95,95,.3)}
+
+/* INFO PAGE */
+.info-page{max-width:860px;margin:0 auto;padding:40px 24px}
+.info-hero{text-align:center;margin-bottom:40px}
+.info-hero h1{font-size:26px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px}
+.info-hero p{color:var(--text-muted);font-size:14px;max-width:500px;margin:0 auto}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.info-card h3{font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.info-card ul{list-style:none;display:flex;flex-direction:column;gap:5px}
+.info-card li{font-size:12px;color:var(--text-muted);display:flex;align-items:flex-start;gap:5px}
+.info-card li::before{content:'›';color:var(--accent);flex-shrink:0}
+.info-full{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px}
+.info-full h3{font-size:14px;font-weight:700;margin-bottom:14px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;color:var(--text-dim);font-weight:600;padding:7px 10px;border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+td{padding:9px 10px;border-bottom:1px solid rgba(46,49,72,.5);color:var(--text-muted);vertical-align:top}
+td:first-child{color:var(--text);font-weight:500}
+code{font-family:'Consolas',monospace;font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--accent2)}
+.tag{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500}
+.tag-a{background:rgba(255,107,53,.15);color:#ff6b35;border:1px solid rgba(255,107,53,.3)}
+.tag-g{background:rgba(66,133,244,.15);color:#4285f4;border:1px solid rgba(66,133,244,.3)}
+.tag-o{background:rgba(16,163,127,.15);color:#10a37f;border:1px solid rgba(16,163,127,.3)}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--surface2);border:1px solid var(--success);color:var(--success);padding:10px 18px;border-radius:var(--radius);font-size:13px;z-index:200;opacity:0;transform:translateY(8px);transition:all .25s ease;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo"><div class="dot"></div>My Prompt Maker</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchPage('gen',this)">指令產生器</button>
+    <button class="nav-tab" onclick="switchPage('info',this)">系統資訊</button>
+  </div>
+</nav>
+
+<!-- ══ 指令產生器 ══ -->
+<div class="page active" id="page-gen">
+  <div class="gen-tabs">
+    <button class="gen-tab active" onclick="switchGen('official',this)">官方範本庫</button>
+    <button class="gen-tab" onclick="switchGen('visual',this)">視覺提示詞</button>
+  </div>
+
+  <!-- ─ 官方範本庫 ─ -->
+  <div class="gen-panel active" id="panel-official">
+    <div class="sidebar">
+      <div class="section-label">官方框架 · PTCF</div>
+
+      <div class="form-group">
+        <label>① 功能部門</label>
+        <select id="sel-dept" onchange="onDeptChange()">
+          <option value="">— 選擇部門 —</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>② 角色</label>
+        <select id="sel-role" onchange="onRoleChange()" disabled>
+          <option value="">— 先選部門 —</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>③ 任務 / 用途</label>
+        <select id="sel-task" onchange="onTaskChange()" disabled>
+          <option value="">— 先選角色 —</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="ctx-wrapper" style="display:none">
+        <label style="color:var(--accent2);margin-bottom:10px;display:block">④ 填入情境細節</label>
+        <div id="ctx-fields"></div>
+      </div>
+
+      <div class="form-group">
+        <label>⑤ 輸出格式</label>
+        <select id="sel-fmt">
+          <option value="">不指定（依任務決定）</option>
+          <option value="bullet">條列式重點</option>
+          <option value="table">表格</option>
+          <option value="para">段落文字</option>
+          <option value="email">電子郵件格式</option>
+          <option value="slide">簡報大綱</option>
+          <option value="json">JSON 結構</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Prompt 語言</label>
+        <div class="chip-row">
+          <div class="chip active" onclick="setLang('zh',this)">繁體中文</div>
+          <div class="chip" onclick="setLang('en',this)">English</div>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="genOfficial()">生成指令</button>
+      <button class="btn-ghost" onclick="resetOfficial()">清除</button>
+    </div>
+
+    <div class="output-panel">
+      <div class="out-header">
+        <div class="out-title">產生結果</div>
+        <button class="btn-copy" id="copy-off" onclick="copyOut('out-off','copy-off')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>複製
+        </button>
+      </div>
+      <div class="ptcf-row">
+        <span class="ptcf-badge p-badge">P · Persona 角色</span>
+        <span class="ptcf-badge t-badge">T · Task 任務</span>
+        <span class="ptcf-badge c-badge">C · Context 背景</span>
+        <span class="ptcf-badge f-badge">F · Format 格式</span>
+      </div>
+      <div id="out-empty-off" class="out-empty"><div class="ico">✦</div><p>選擇部門 → 角色 → 任務，填入情境後產生指令</p></div>
+      <pre class="out-box" id="out-off" style="display:none"></pre>
+    </div>
+  </div>
+
+  <!-- ─ 視覺提示詞 ─ -->
+  <div class="gen-panel" id="panel-visual">
+    <div class="sidebar">
+      <div class="section-label">A · 色彩系統</div>
+
+      <div class="form-group">
+        <label>使用場景描述 <span style="color:var(--accent)">*</span></label>
+        <input type="text" id="vis-usecase" placeholder="例：知識型簡報底圖、YouTube 封面">
+      </div>
+      <div class="form-group">
+        <label>主色</label>
+        <input type="text" id="vis-primary" placeholder="例：深邃黑、量子深藍 #03045E">
+      </div>
+      <div class="form-group">
+        <label>強調色 / 漸層色</label>
+        <input type="text" id="vis-accent" placeholder="例：霓虹青 neon cyan #00FFE0">
+      </div>
+      <div class="form-group">
+        <label>漸層方向</label>
+        <select id="vis-gradient">
+          <option value="">無特定漸層</option>
+          <option value="由中心向外放射">由中心向外放射</option>
+          <option value="由左至右線性漸層">由左至右線性漸層</option>
+          <option value="由下至上線性漸層">由下至上線性漸層</option>
+          <option value="對角線漸層">對角線漸層</option>
+        </select>
+      </div>
+
+      <div class="section-label" style="margin-top:4px">B · 材質紋理</div>
+      <div class="form-group">
+        <label>紋理元素（可多選）</label>
+        <div class="chip-row" id="tex-chips">
+          <div class="chip tex-chip" data-val="方形微型晶片">晶片</div>
+          <div class="chip tex-chip" data-val="發光數據網格">數據網格</div>
+          <div class="chip tex-chip" data-val="六角蜂巢格">蜂巢格</div>
+          <div class="chip tex-chip" data-val="電路板線路">電路板</div>
+          <div class="chip tex-chip" data-val="流動金屬波紋">金屬波紋</div>
+          <div class="chip tex-chip" data-val="量子粒子場">量子粒子</div>
+          <div class="chip tex-chip" data-val="幾何框架線條">幾何框架</div>
+          <div class="chip tex-chip" data-val="稜鏡折射紋">稜鏡折射</div>
+        </div>
+      </div>
+
+      <div class="section-label" style="margin-top:4px">C · 光線情境</div>
+      <div class="form-group">
+        <label>主要光線效果</label>
+        <select id="vis-lighting">
+          <option value="holo">全息投影光暈（未來科技感）</option>
+          <option value="neon">霓虹邊緣發光（強烈視覺衝擊）</option>
+          <option value="lava">熔岩裂隙光（原始能量）</option>
+          <option value="prism">稜鏡折射光譜（光學奇觀）</option>
+          <option value="ambient">環境均勻柔光（穩定基調）</option>
+          <option value="quantum">量子粒子自發光（科學前沿）</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>高光與陰影</label>
+        <select id="vis-shadow">
+          <option value="cold">冷色調高光 + 深邃邊緣陰影</option>
+          <option value="warm">暖色調高光 + 漸暗暈影</option>
+          <option value="natural">光源自然衰減，無強調陰影</option>
+          <option value="none">無特殊高光設計</option>
+        </select>
+      </div>
+
+      <div class="section-label" style="margin-top:4px">D · 構圖版式</div>
+      <div class="form-group">
+        <label>構圖與留白策略</label>
+        <select id="vis-composition">
+          <option value="left40">左側 40% 深負空間（供文字數據）</option>
+          <option value="left50">左側 50% 深負空間（供標題重點）</option>
+          <option value="right40">右側 40% 深負空間（供文字數據）</option>
+          <option value="center">中央焦點，四周漸層消散</option>
+          <option value="full">均勻分布，全版皆可放置內容</option>
+        </select>
+      </div>
+
+      <div class="section-label" style="margin-top:4px">E · 設計美學</div>
+      <div class="form-group">
+        <label>整體美學風格</label>
+        <select id="vis-aesthetic">
+          <option value="科技極簡主義">科技極簡主義</option>
+          <option value="前衛 AI 科技">前衛 AI 科技</option>
+          <option value="賽博龐克">賽博龐克</option>
+          <option value="量子物理微觀宇宙">量子物理微觀宇宙</option>
+          <option value="工業熔岩">工業熔岩</option>
+          <option value="包豪斯幾何現代主義">包豪斯幾何現代主義</option>
+          <option value="數學黃金比例">數學黃金比例</option>
+          <option value="無障礙商業專業">無障礙商業專業</option>
+        </select>
+      </div>
+
+      <div class="section-label" style="margin-top:4px">F · 技術規格</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+        <div>
+          <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:6px">解析度</label>
+          <select id="vis-res"><option>8K</option><option>4K</option><option>1080p</option></select>
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:6px">比例</label>
+          <select id="vis-ratio"><option>16:9</option><option>4:3</option><option>1:1</option><option>9:16</option></select>
+        </div>
+      </div>
+
+      <div class="section-label" style="margin-top:4px">目標平台</div>
+      <div class="form-group">
+        <div class="chip-row">
+          <div class="chip ai-vis-chip active" onclick="this.classList.toggle('active')">Midjourney</div>
+          <div class="chip ai-vis-chip" onclick="this.classList.toggle('active')">DALL·E 3</div>
+          <div class="chip ai-vis-chip" onclick="this.classList.toggle('active')">Stable Diffusion</div>
+          <div class="chip ai-vis-chip" onclick="this.classList.toggle('active')">Firefly</div>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="genVisual()">生成視覺提示詞</button>
+      <button class="btn-ghost" onclick="resetVisual()">清除所有設定</button>
+    </div>
+
+    <div class="output-panel">
+      <div class="out-header">
+        <div class="out-title">視覺提示詞</div>
+        <button class="btn-copy" id="copy-vis" onclick="copyOut('out-vis','copy-vis')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>複製
+        </button>
+      </div>
+      <div id="out-empty-vis" class="out-empty"><div class="ico">✦</div><p>設定色彩、紋理、光線、構圖後，點擊「生成視覺提示詞」<br>直接貼入 Midjourney / DALL·E / Firefly 使用</p></div>
+      <pre class="out-box" id="out-vis" style="display:none"></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 系統資訊 ══ -->
+<div class="page" id="page-info">
+  <div class="info-page">
+    <div class="info-hero">
+      <h1>My Prompt Maker</h1>
+      <p>基於 Anthropic、Google Gemini、OpenAI 三大官方指南的提示詞生成框架。v1.1 · 2026-05-02</p>
+    </div>
+
+    <div class="info-full">
+      <h3>Gemini 官方框架：PTCF</h3>
+      <table>
+        <thead><tr><th>元素</th><th>說明</th><th>範例</th></tr></thead>
+        <tbody>
+          <tr><td>P · Persona</td><td>設定 AI 扮演的角色與專業背景</td><td>You are a marketing manager at a B2B SaaS company</td></tr>
+          <tr><td>T · Task</td><td>明確說明要執行的任務（一次一件事）</td><td>Draft a press release announcing our new product launch</td></tr>
+          <tr><td>C · Context</td><td>提供相關背景、限制與受眾資訊</td><td>The audience is tech journalists; keep it under 400 words</td></tr>
+          <tr><td>F · Format</td><td>指定輸出格式、長度、結構</td><td>Use standard press release format with headline, dateline, and quote</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="info-full">
+      <h3>官方範本庫涵蓋部門（來源：Gemini for Workspace Prompting Guide 101）</h3>
+      <table>
+        <thead><tr><th>部門</th><th>涵蓋角色</th><th>任務數</th></tr></thead>
+        <tbody>
+          <tr><td>行政支援</td><td>執行秘書、EA</td><td>4</td></tr>
+          <tr><td>公關通訊</td><td>公關分析師、通訊經理</td><td>4</td></tr>
+          <tr><td>客戶服務</td><td>客服經理、客服代表</td><td>5</td></tr>
+          <tr><td>高階主管</td><td>CEO、CMO、CTO、CHRO</td><td>8</td></tr>
+          <tr><td>人力資源</td><td>招募人員、HR 經理</td><td>6</td></tr>
+          <tr><td>行銷</td><td>品牌經理、數位行銷、內容行銷</td><td>9</td></tr>
+          <tr><td>專案管理</td><td>PM、技術 PM</td><td>4</td></tr>
+          <tr><td>業務銷售</td><td>銷售經理、客戶經理、BD</td><td>6</td></tr>
+          <tr><td>小型企業主</td><td>老闆、創業者</td><td>4</td></tr>
+          <tr><td>新創領導者</td><td>創辦人、產品負責人、營運負責人</td><td>5</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <h3>Anthropic Claude <span class="tag tag-a">Anthropic</span></h3>
+        <ul>
+          <li>XML 標籤結構（&lt;instructions&gt; &lt;context&gt; &lt;examples&gt;）</li>
+          <li>正面指令優先於負面禁止</li>
+          <li>角色設定在 system prompt</li>
+          <li>Few-shot：3–5 個範例</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>Google Gemini <span class="tag tag-g">Google</span></h3>
+        <ul>
+          <li>PTCF 框架（Persona/Task/Context/Format）</li>
+          <li>指令放提示詞最末端</li>
+          <li>XML/Markdown 結構化分區</li>
+          <li>一次提示只做一件事</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>OpenAI ChatGPT <span class="tag tag-o">OpenAI</span></h3>
+        <ul>
+          <li>POWER 框架（Purpose/Output/Working Context/Examples/Refinement）</li>
+          <li>CO-STAR 框架（Context/Objective/Style/Tone/Audience/Response）</li>
+          <li>新推理模型（o-series）不需 CoT</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>Midjourney <span class="tag" style="background:rgba(255,215,0,.12);color:#ffd700;border-color:rgba(255,215,0,.3)">視覺生成</span></h3>
+        <ul>
+          <li><code>--ar 16:9</code> 設定比例</li>
+          <li><code>--style raw</code> 減少過度美化</li>
+          <li><code>--v 6.1</code> 最新版本</li>
+          <li><code>--chaos 0–100</code> 控制隨機性</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">已複製到剪貼簿</div>
+
+<script>
+// ══════════════════════════════════════════
+// 官方範本資料庫（來源：Gemini for Workspace Prompting Guide 101）
+// 結構：部門 → 角色 → 任務 → PTCF 模板
+// ══════════════════════════════════════════
+const DB = {
+  admin: {
+    label: "行政支援 Administrative Support",
+    roles: {
+      ea: {
+        label: "執行秘書 / EA",
+        tasks: [
+          { id:"agenda", label:"規劃會議議程",
+            zh:"你是一位專業的執行秘書。請協助我規劃一份關於【{主題}】的【{會議類型}】議程，會議時長【{時長}】，出席者包含【{出席者角色}】。請列出時間配置、討論重點，以及每個議程項目的預期產出。",
+            en:"You are an executive administrator. Help me plan a detailed agenda for a {meeting_type} on {topic}. The meeting will last {duration} with attendees including {attendee_roles}. Include time allocations, key discussion points, and expected outcomes for each item.",
+            fields:["主題","會議類型（例：季度回顧）","時長（例：90分鐘）","出席者角色"],
+            fields_en:["topic","meeting_type","duration","attendee_roles"] },
+          { id:"email", label:"管理大量電子郵件",
+            zh:"你是一位執行秘書，正在協助主管處理信箱。請針對以下郵件情境草擬一封回覆：【{郵件情境描述}】。語氣應【{語氣要求}】，長度控制在【{字數}】字以內。",
+            en:"You are an executive administrator managing a busy inbox. Draft a reply for the following email situation: {email_situation}. The tone should be {tone} and the response should be under {word_count} words.",
+            fields:["郵件情境描述","語氣要求（例：專業友善）","字數限制"],
+            fields_en:["email_situation","tone","word_count"] },
+          { id:"travel", label:"規劃商務出差",
+            zh:"你是一位執行秘書。請協助規劃一趟從【{出發地}】前往【{目的地}】的商務出差，出差日期為【{日期}】，主要目的是【{出差目的}】。請提供行程建議、住宿考量，以及需要預先確認的事項清單。",
+            en:"You are an executive administrator. Help plan a business trip from {origin} to {destination} on {dates}. The purpose is {trip_purpose}. Provide a suggested itinerary, accommodation considerations, and a checklist of things to confirm in advance.",
+            fields:["出發地","目的地","出差日期","出差目的"],
+            fields_en:["origin","destination","dates","trip_purpose"] },
+          { id:"budget", label:"追蹤差旅與娛樂預算",
+            zh:"你是一位行政助理。請幫我建立一份差旅與娛樂費用的追蹤框架，部門為【{部門名稱}】，季度預算為【{預算金額}】。請包含費用分類、核銷欄位，以及每月結算的提醒機制。",
+            en:"You are an administrative assistant. Help me create a travel and entertainment budget tracking framework for the {department} department with a quarterly budget of {budget_amount}. Include expense categories, reimbursement fields, and a monthly reconciliation reminder system.",
+            fields:["部門名稱","季度預算金額"],
+            fields_en:["department","budget_amount"] }
+        ]
+      }
+    }
+  },
+  comms: {
+    label: "公關通訊 Communications",
+    roles: {
+      pr: {
+        label: "公關分析師 / PR",
+        tasks: [
+          { id:"press", label:"撰寫新聞稿",
+            zh:"你是一位公關專家。請為以下事件撰寫一份新聞稿：【{事件描述}】。公司名稱：【{公司名稱}】，目標媒體受眾：【{目標媒體}】。請使用標準新聞稿格式，包含標題、電頭、引述，以及末尾的關於公司段落，全文控制在400字以內。",
+            en:"You are a public relations expert. Write a press release for the following announcement: {event_description}. Company: {company_name}. Target audience: {target_media}. Use standard press release format including headline, dateline, a quote, and a boilerplate. Keep it under 400 words.",
+            fields:["事件描述","公司名稱","目標媒體"],
+            fields_en:["event_description","company_name","target_media"] },
+          { id:"brief", label:"準備分析師說明會",
+            zh:"你是一位通訊經理。請協助我為即將舉行的分析師說明會準備簡報重點，主題是【{說明會主題}】。預計出席者為【{出席者背景}】，我們希望傳達的核心訊息是【{核心訊息}】。請列出開場白、五個主要論點，以及預期Q&A問題與建議回答。",
+            en:"You are a communications manager. Help me prepare talking points for an analyst briefing on {briefing_topic}. The attendees are {attendee_background}. Our key message is {key_message}. List an opening statement, five main points, and anticipated Q&A with suggested answers.",
+            fields:["說明會主題","出席者背景","核心訊息"],
+            fields_en:["briefing_topic","attendee_background","key_message"] },
+          { id:"internal", label:"撰寫內部公告",
+            zh:"你是一位內部通訊負責人。請針對以下情況撰寫一封全員公告信：【{公告內容}】。語氣應【{語氣}】，需要特別注意【{敏感事項}】。請包含清楚的背景說明、對員工的影響，以及後續步驟。",
+            en:"You are an internal communications manager. Draft an all-staff announcement for: {announcement_content}. The tone should be {tone}. Be mindful of {sensitive_considerations}. Include context, impact on employees, and next steps.",
+            fields:["公告內容","語氣（例：透明、鼓勵）","需注意的敏感事項"],
+            fields_en:["announcement_content","tone","sensitive_considerations"] },
+          { id:"mock", label:"準備媒體採訪問答",
+            zh:"你是一位媒體訓練師。請為我的發言人準備針對【{議題}】的模擬記者問題，共【{題數}】題，難度設定為【{難度：一般/尖銳/危機}】。每題附上建議回答方向，以及應避免說的話。",
+            en:"You are a media trainer. Prepare {number} mock journalist questions on {topic} at a {difficulty_level} difficulty level (general/tough/crisis) for our spokesperson. Include suggested response directions and things to avoid saying for each question.",
+            fields:["議題","題數（例：10）","難度（一般/尖銳/危機）"],
+            fields_en:["topic","number","difficulty_level"] }
+        ]
+      }
+    }
+  },
+  cs: {
+    label: "客戶服務 Customer Service",
+    roles: {
+      csm: {
+        label: "客服經理 / 客服代表",
+        tasks: [
+          { id:"reply", label:"草擬客戶回覆",
+            zh:"你是一位有經驗的客服代表。請針對以下客戶問題草擬一封回覆：【{客戶問題}】。我們的解決方案是：【{解決方案}】。回覆語氣應【{語氣}】，長度控制在【{字數}】字以內，結尾附上後續追蹤步驟。",
+            en:"You are an experienced customer service representative. Draft a reply to the following customer issue: {customer_issue}. Our solution is: {solution}. The tone should be {tone} and the response under {word_count} words. Include follow-up steps at the end.",
+            fields:["客戶問題","我們的解決方案","語氣（例：同理、專業）","字數限制"],
+            fields_en:["customer_issue","solution","tone","word_count"] },
+          { id:"faq", label:"建立 FAQ 知識庫",
+            zh:"你是一位客服知識管理專員。請根據以下常見客戶問題類型，建立一份 FAQ 知識庫草稿：【{問題類型清單}】。產品/服務名稱：【{產品名稱}】。每個問題請提供：標準問題措辭、建議回答（100字以內）、相關連結欄位。",
+            en:"You are a customer service knowledge manager. Create a FAQ knowledge base draft based on these common issue categories: {issue_categories}. Product/service: {product_name}. For each question include: standard question wording, suggested answer (under 100 words), and a related link field.",
+            fields:["常見問題類型（逗號分隔）","產品/服務名稱"],
+            fields_en:["issue_categories","product_name"] },
+          { id:"feedback", label:"分析客戶回饋",
+            zh:"你是一位客戶體驗分析師。請分析以下客戶回饋資料，找出主要痛點、正面評價，以及改善機會：【{回饋資料}】。請以條列式整理，並針對前三大問題提供具體改善建議。",
+            en:"You are a customer experience analyst. Analyze the following customer feedback to identify main pain points, positive highlights, and improvement opportunities: {feedback_data}. Summarize in bullet points and provide specific improvement suggestions for the top three issues.",
+            fields:["客戶回饋資料（可貼入文字）"],
+            fields_en:["feedback_data"] },
+          { id:"framework", label:"建立溝通標準框架",
+            zh:"你是一位客服培訓主管。請為我們的客服團隊建立一套標準溝通框架，適用情境：【{適用情境}】，客服風格要求：【{風格要求}】。框架應包含：開場白範本、問題釐清流程、道歉與補救話術、結案確認語。",
+            en:"You are a customer service training manager. Create a standard communication framework for our support team for {situation_type} situations, with a {style_requirement} communication style. Include templates for: opening statements, issue clarification flow, apology/resolution language, and closing confirmation.",
+            fields:["適用情境（例：退款申請、產品問題）","客服風格要求（例：同理、效率導向）"],
+            fields_en:["situation_type","style_requirement"] },
+          { id:"voc", label:"進行客戶聲音研究",
+            zh:"你是一位市場研究員。請設計一份針對【{產品/服務名稱}】的客戶聲音（VoC）調查問卷，目標客群為【{目標客群}】，研究目的是了解【{研究目的}】。請設計【{題數}】題，包含封閉式與開放式問題，並說明每題的研究意圖。",
+            en:"You are a market researcher. Design a Voice of the Customer (VoC) survey for {product_service} targeting {target_audience} to understand {research_purpose}. Create {question_count} questions mixing closed and open-ended formats, and explain the research intent for each.",
+            fields:["產品/服務名稱","目標客群","研究目的","問題數量"],
+            fields_en:["product_service","target_audience","research_purpose","question_count"] }
+        ]
+      }
+    }
+  },
+  exec: {
+    label: "高階主管 Executives",
+    roles: {
+      ceo: {
+        label: "CEO 執行長",
+        tasks: [
+          { id:"pres", label:"快速建立簡報大綱",
+            zh:"你是一位策略顧問，正在協助 CEO 準備重要簡報。主題是【{簡報主題}】，受眾是【{受眾}】，時長【{時長}】分鐘。請建立一份完整簡報大綱，包含每一頁的標題、核心訊息，以及建議的視覺化方式。",
+            en:"You are a strategic advisor helping a CEO prepare a presentation on {presentation_topic} for {audience} in {duration} minutes. Create a complete slide outline with title, key message, and suggested visual for each slide.",
+            fields:["簡報主題","受眾（例：董事會、全員大會）","時長（分鐘）"],
+            fields_en:["presentation_topic","audience","duration"] },
+          { id:"comms-ceo", label:"撰寫主管行動中的通訊",
+            zh:"你是 CEO 的助理。請協助起草一封簡短有力的訊息，情境是：【{情境描述}】，收件人是【{收件人}】，核心要傳達的是：【{核心訊息}】。請控制在【{字數}】字以內，語氣應具領導力且真誠。",
+            en:"You are a CEO's assistant. Draft a brief, impactful message for the following situation: {situation}. The recipient is {recipient} and the core message is: {core_message}. Keep it under {word_count} words. The tone should be leadership-oriented and genuine.",
+            fields:["情境描述","收件人","核心訊息","字數限制"],
+            fields_en:["situation","recipient","core_message","word_count"] }
+        ]
+      },
+      cmo: {
+        label: "CMO 行銷長",
+        tasks: [
+          { id:"research", label:"市場研究與活動規劃",
+            zh:"你是一位市場策略專家。請針對【{產品/服務}】在【{目標市場}】的市場機會進行分析，競爭對手包含【{主要競品}】。請提供：市場規模估算、目標客群特徵、差異化切入點，以及一份行銷活動的初步規劃框架。",
+            en:"You are a market strategy expert. Analyze market opportunities for {product_service} in {target_market} against competitors {main_competitors}. Provide: market size estimate, target customer profile, differentiation angles, and an initial marketing campaign planning framework.",
+            fields:["產品/服務","目標市場","主要競品（逗號分隔）"],
+            fields_en:["product_service","target_market","main_competitors"] },
+          { id:"compete", label:"競爭分析",
+            zh:"你是一位競爭情報分析師。請針對以下競爭對手進行分析：【{競爭對手清單}】，我們的產品/服務是【{我方產品}】，目標市場是【{目標市場}】。請提供：各競品的優勢與弱點、市場定位圖、我方的差異化機會。",
+            en:"You are a competitive intelligence analyst. Analyze the following competitors: {competitor_list} relative to our product/service {our_product} in {target_market}. Provide: each competitor's strengths and weaknesses, a positioning map, and our differentiation opportunities.",
+            fields:["競爭對手清單（逗號分隔）","我方產品/服務","目標市場"],
+            fields_en:["competitor_list","our_product","target_market"] }
+        ]
+      },
+      cto: {
+        label: "CTO 技術長",
+        tasks: [
+          { id:"techtrend", label:"總結新興技術趨勢",
+            zh:"你是一位技術策略顧問。請針對【{技術領域}】整理一份給 CTO 參考的新興技術趨勢報告，聚焦在未來【{時間範圍}】的發展。請包含：三大關鍵趨勢、對我們產業【{產業}】的具體影響，以及建議的應對策略。",
+            en:"You are a technology strategy consultant. Summarize emerging technology trends in {tech_domain} for a CTO audience, focusing on the next {time_horizon}. Include: three key trends, specific impact on {industry}, and recommended response strategies.",
+            fields:["技術領域（例：生成式AI、量子運算）","時間範圍（例：12-18個月）","所在產業"],
+            fields_en:["tech_domain","time_horizon","industry"] },
+          { id:"nontechcomms", label:"向非技術受眾說明技術議題",
+            zh:"你是一位技術溝通專家。請將以下技術概念翻譯成非技術受眾能理解的語言：【{技術概念}】，受眾背景是【{受眾背景}】。請使用比喻、避免術語，並說明這個技術對他們日常工作的具體影響。",
+            en:"You are a technical communication specialist. Translate the following technical concept for a non-technical audience: {technical_concept}. The audience is {audience_background}. Use analogies, avoid jargon, and explain the concrete impact on their daily work.",
+            fields:["技術概念（請詳細描述）","受眾背景（例：銷售團隊、董事會）"],
+            fields_en:["technical_concept","audience_background"] }
+        ]
+      },
+      chro: {
+        label: "CHRO 人資長",
+        tasks: [
+          { id:"engagement", label:"評估員工滿意度",
+            zh:"你是一位人力資源策略顧問。請設計一份員工滿意度評估計劃，公司規模【{員工人數}】人，目前面臨的挑戰是【{主要挑戰}】。請提供：調查問卷框架（10題）、分析重點指標，以及後續行動計劃建議。",
+            en:"You are an HR strategy consultant. Design an employee satisfaction assessment plan for a company of {employee_count} people facing challenges with {main_challenges}. Provide: a 10-question survey framework, key metrics to analyze, and recommended follow-up action plan.",
+            fields:["員工人數","目前主要挑戰（例：離職率高、遠距工作適應）"],
+            fields_en:["employee_count","main_challenges"] }
+        ]
+      }
+    }
+  },
+  hr: {
+    label: "人力資源 Human Resources",
+    roles: {
+      recruiter: {
+        label: "招募人員 Recruiter",
+        tasks: [
+          { id:"jd", label:"撰寫職缺說明 JD",
+            zh:"你是一位資深招募專員。請為以下職位撰寫一份吸引優秀人才的職缺說明：職位名稱【{職位名稱}】，部門【{部門}】，主要職責包含【{主要職責}】，必要條件【{必要條件}】。語氣應【{語氣}】，並融入公司文化特色：【{公司文化}】。",
+            en:"You are a senior recruiter. Write a compelling job description for a {job_title} role in the {department} department. Key responsibilities: {key_responsibilities}. Requirements: {requirements}. Tone: {tone}. Include company culture elements: {company_culture}.",
+            fields:["職位名稱","部門","主要職責（2-3條）","必要條件","語氣（例：專業積極）","公司文化特色"],
+            fields_en:["job_title","department","key_responsibilities","requirements","tone","company_culture"] },
+          { id:"interview", label:"設計面試問題",
+            zh:"你是一位招募專家。請為【{職位名稱}】設計一套結構化面試問題，共【{題數}】題，重點評估【{核心能力}】。請包含：行為式問題（STAR 格式）、情境式問題，以及建議的評分標準。",
+            en:"You are a recruiting expert. Design a structured interview question set with {question_count} questions for a {job_title} role, focusing on evaluating {core_competencies}. Include behavioral questions (STAR format), situational questions, and suggested scoring criteria.",
+            fields:["職位名稱","題數（例：8）","需評估的核心能力"],
+            fields_en:["job_title","question_count","core_competencies"] },
+          { id:"metrics", label:"招募指標報告",
+            zh:"你是一位招募分析師。請協助我整理一份招募績效報告，本季的主要數據如下：【{數據摘要}】。請分析：招募效率瓶頸、與上季比較，以及三項改善建議。",
+            en:"You are a recruiting analyst. Help me prepare a recruiting performance report. This quarter's key data: {data_summary}. Analyze: efficiency bottlenecks, comparison with last quarter, and three improvement recommendations.",
+            fields:["數據摘要（例：填缺時間、應徵人數、錄取率等）"],
+            fields_en:["data_summary"] }
+        ]
+      },
+      hr_mgr: {
+        label: "HR 經理",
+        tasks: [
+          { id:"onboard", label:"設計員工入職流程",
+            zh:"你是一位 HR 經理。請為以下職位設計一份 30-60-90 天的入職計劃：職位【{職位名稱}】，部門【{部門}】，主要學習目標是【{學習目標}】。請列出每個階段的關鍵里程碑、必要培訓，以及評估方式。",
+            en:"You are an HR manager. Design a 30-60-90 day onboarding plan for a new {job_title} in {department}. Primary learning objectives: {learning_objectives}. List key milestones, required training, and evaluation methods for each phase.",
+            fields:["職位名稱","部門","主要學習目標"],
+            fields_en:["job_title","department","learning_objectives"] },
+          { id:"ldp", label:"制定個人學習發展計劃",
+            zh:"你是一位人才發展專員。請為以下員工制定個性化學習發展計劃：員工目前職位【{現職}】，發展目標【{發展目標}】，現有優勢【{優勢}】，待加強領域【{待加強}】，計劃時程【{時程}】。請提供具體的學習資源推薦與里程碑。",
+            en:"You are a talent development specialist. Create a personalized learning and development plan for an employee in {current_role} with development goals of {development_goal}, strengths in {strengths}, areas to improve in {areas_to_improve}, over {timeline}. Include specific learning resources and milestones.",
+            fields:["員工現職","發展目標","現有優勢","待加強領域","計劃時程"],
+            fields_en:["current_role","development_goal","strengths","areas_to_improve","timeline"] },
+          { id:"survey", label:"員工參與度調查",
+            zh:"你是一位員工體驗設計師。請設計一份員工參與度調查問卷，主題聚焦在【{調查主題}】，目標受眾是【{受眾}】。請設計【{題數}】題，包含量表題與開放式問題，並說明每個問題群的研究目的。",
+            en:"You are an employee experience designer. Design an employee engagement survey focused on {survey_topic} for {target_audience}. Create {question_count} questions mixing rating scales and open-ended questions, and explain the research purpose for each question group.",
+            fields:["調查主題（例：混合辦公政策滿意度）","目標受眾","題數"],
+            fields_en:["survey_topic","target_audience","question_count"] }
+        ]
+      }
+    }
+  },
+  marketing: {
+    label: "行銷 Marketing",
+    roles: {
+      brand: {
+        label: "品牌經理 Brand Manager",
+        tasks: [
+          { id:"brand_strategy", label:"建立品牌策略",
+            zh:"你是一位品牌策略師。請協助我為【{品牌/產品名稱}】制定品牌策略，目標市場是【{目標市場}】，主要競爭者是【{競爭者}】，我們的核心優勢是【{核心優勢}】。請提供：品牌定位聲明、品牌個性描述、核心訊息架構，以及差異化策略。",
+            en:"You are a brand strategist. Help me develop a brand strategy for {brand_product_name} targeting {target_market} against competitors {competitors}. Our core advantage is {core_advantage}. Provide: brand positioning statement, brand personality, core message architecture, and differentiation strategy.",
+            fields:["品牌/產品名稱","目標市場","主要競爭者","核心優勢"],
+            fields_en:["brand_product_name","target_market","competitors","core_advantage"] },
+          { id:"partnership", label:"評估品牌合作機會",
+            zh:"你是一位品牌合作策略師。請評估以下潛在品牌合作機會：我方品牌【{我方品牌}】，潛在合作對象【{合作對象}】，合作目標【{合作目標}】。請分析：雙方品牌契合度、潛在受益、風險，以及合作提案框架。",
+            en:"You are a brand partnership strategist. Evaluate a potential brand partnership: our brand is {our_brand}, potential partner is {partner}, and our goal is {partnership_goal}. Analyze: brand fit, mutual benefits, risks, and a partnership proposal framework.",
+            fields:["我方品牌名稱","潛在合作對象","合作目標"],
+            fields_en:["our_brand","partner","partnership_goal"] }
+        ]
+      },
+      digital: {
+        label: "數位行銷經理 Digital Marketing Manager",
+        tasks: [
+          { id:"sem", label:"撰寫 SEM 廣告文案",
+            zh:"你是一位數位廣告文案師。請為以下產品撰寫【{廣告數量}】組 Google 搜尋廣告文案：產品名稱【{產品名稱}】，目標關鍵字【{目標關鍵字}】，核心賣點【{核心賣點}】，目標受眾【{目標受眾}】。每組請提供：標題（30字以內）×3、描述（90字以內）×2，以及建議 CTA。",
+            en:"You are a digital ad copywriter. Write {ad_count} sets of Google Search ad copy for {product_name} targeting keywords {target_keywords}. Core selling points: {selling_points}. Target audience: {target_audience}. Each set: 3 headlines (max 30 chars), 2 descriptions (max 90 chars), and suggested CTA.",
+            fields:["廣告數量（例：3組）","產品名稱","目標關鍵字（逗號分隔）","核心賣點","目標受眾"],
+            fields_en:["ad_count","product_name","target_keywords","selling_points","target_audience"] },
+          { id:"campaign", label:"規劃入站行銷活動",
+            zh:"你是一位成長行銷策略師。請為【{產品/服務}】設計一套入站行銷活動，目標是【{行銷目標}】（例：增加 X% 的自然流量），時間範圍【{時程}】，預算【{預算}】。請提供：內容策略、SEO 重點、轉換漏斗設計，以及成效衡量指標（KPI）。",
+            en:"You are a growth marketing strategist. Design an inbound marketing campaign for {product_service} with the goal of {marketing_goal} over {timeline} with a budget of {budget}. Provide: content strategy, SEO focus areas, conversion funnel design, and KPIs.",
+            fields:["產品/服務","行銷目標","時程","預算"],
+            fields_en:["product_service","marketing_goal","timeline","budget"] }
+        ]
+      },
+      content: {
+        label: "內容行銷經理 Content Marketing",
+        tasks: [
+          { id:"social", label:"撰寫社群媒體貼文",
+            zh:"你是一位社群媒體內容創作者。請為【{品牌名稱}】撰寫【{平台}】貼文【{則數}】則，主題是【{貼文主題}】，目標受眾是【{受眾}】，品牌語氣是【{品牌語氣}】。每則請附上主文、hashtag 建議，以及發文時機建議。",
+            en:"You are a social media content creator. Write {post_count} {platform} posts for {brand_name} on the topic of {post_topic}. Target audience: {audience}. Brand tone: {brand_tone}. For each post include: main copy, hashtag suggestions, and recommended posting time.",
+            fields:["品牌名稱","平台（例：LinkedIn/Instagram/Facebook）","則數","貼文主題","目標受眾","品牌語氣"],
+            fields_en:["brand_name","platform","post_count","post_topic","audience","brand_tone"] },
+          { id:"plan", label:"建立內容行銷計劃",
+            zh:"你是一位內容策略師。請為【{品牌/產品}】制定一份【{時程，例：季度}】內容行銷計劃，目標受眾是【{受眾}】，行銷目標是【{目標}】。請包含：內容主題集群、各渠道分配策略、編輯行事曆框架，以及內容績效評估指標。",
+            en:"You are a content strategist. Create a {timeline} content marketing plan for {brand_product} targeting {audience} with the goal of {marketing_goal}. Include: content topic clusters, channel distribution strategy, editorial calendar framework, and content performance metrics.",
+            fields:["品牌/產品","計劃時程（例：Q3季度）","目標受眾","行銷目標"],
+            fields_en:["brand_product","timeline","audience","marketing_goal"] },
+          { id:"blog", label:"撰寫部落格文章大綱",
+            zh:"你是一位內容行銷寫手。請為以下主題撰寫一篇 SEO 優化的部落格文章大綱：主題【{文章主題}】，目標關鍵字【{關鍵字}】，目標受眾【{受眾}】，預計字數【{字數}】。請包含：H1/H2/H3 結構、每個段落的核心論點，以及 CTA 設計。",
+            en:"You are a content marketing writer. Create an SEO-optimized blog article outline for topic: {article_topic}. Target keyword: {keyword}. Audience: {audience}. Target word count: {word_count}. Include: H1/H2/H3 structure, core argument for each section, and CTA design.",
+            fields:["文章主題","目標 SEO 關鍵字","目標受眾","預計字數"],
+            fields_en:["article_topic","keyword","audience","word_count"] }
+        ]
+      }
+    }
+  },
+  pm: {
+    label: "專案管理 Project Management",
+    roles: {
+      project_mgr: {
+        label: "專案經理 PM",
+        tasks: [
+          { id:"status", label:"撰寫專案狀態報告",
+            zh:"你是一位專案經理。請協助我撰寫一份專案狀態報告，專案名稱【{專案名稱}】，當前狀態【{狀態：正常/風險/延遲}】，本期完成事項【{完成事項}】，下期計劃【{下期計劃}】，主要風險【{主要風險}】，需要協助【{需要協助}】。請使用清楚的執行摘要格式，長度控制在一頁以內。",
+            en:"You are a project manager. Write a project status report for {project_name}. Status: {status_green_yellow_red}. Completed this period: {completed_items}. Planned next period: {next_period_plan}. Key risks: {key_risks}. Help needed: {help_needed}. Use a clear executive summary format in one page.",
+            fields:["專案名稱","當前狀態（正常/風險/延遲）","本期完成事項","下期計劃","主要風險","需要協助的事項"],
+            fields_en:["project_name","status_green_yellow_red","completed_items","next_period_plan","key_risks","help_needed"] },
+          { id:"retro", label:"建立專案回顧",
+            zh:"你是一位敏捷教練。請協助我主持一場專案回顧會議，專案是【{專案名稱}】，本次衝刺/階段重點是【{重點描述}】。請設計：三個回顧問題（做得好/待改善/下次嘗試）、討論引導流程，以及行動項目追蹤格式。",
+            en:"You are an agile coach. Help me facilitate a project retrospective for {project_name}. This sprint/phase focus: {phase_description}. Design: three retrospective questions (went well/improve/try next), facilitation flow, and action item tracking format.",
+            fields:["專案名稱","本次衝刺或階段的重點描述"],
+            fields_en:["project_name","phase_description"] },
+          { id:"uat", label:"建立用戶驗收測試",
+            zh:"你是一位品質保證專家。請為以下功能建立用戶驗收測試（UAT）計劃：功能名稱【{功能名稱}】，目標用戶是【{目標用戶}】，主要使用情境是【{使用情境}】。請設計【{測試案例數}】個測試案例，每個包含：前置條件、測試步驟、預期結果，以及通過標準。",
+            en:"You are a QA specialist. Create a User Acceptance Test (UAT) plan for {feature_name} targeting {target_user}. Main use cases: {use_cases}. Design {test_case_count} test cases each with: preconditions, test steps, expected result, and pass criteria.",
+            fields:["功能名稱","目標用戶","主要使用情境","測試案例數量"],
+            fields_en:["feature_name","target_user","use_cases","test_case_count"] },
+          { id:"issue", label:"建立問題追蹤框架",
+            zh:"你是一位專案管理顧問。請為【{專案名稱}】設計一套問題追蹤框架，團隊規模【{團隊規模}】，使用工具是【{使用工具}】。請包含：問題分類標籤、優先級定義、SLA 標準，以及升級流程。",
+            en:"You are a project management consultant. Design an issue tracking framework for {project_name} with a team of {team_size} using {tools}. Include: issue category labels, priority definitions, SLA standards, and escalation process.",
+            fields:["專案名稱","團隊規模","使用的工具（例：Jira、Notion）"],
+            fields_en:["project_name","team_size","tools"] }
+        ]
+      }
+    }
+  },
+  sales: {
+    label: "業務銷售 Sales",
+    roles: {
+      sales_mgr: {
+        label: "銷售經理 Sales Manager",
+        tasks: [
+          { id:"rfp", label:"回覆提案請求 RFP",
+            zh:"你是一位業務提案專家。請協助我回覆以下 RFP 要求：客戶是【{客戶名稱}】，需求是【{需求描述}】，我方的解決方案是【{解決方案}】，差異化優勢是【{差異化優勢}】。請以專業提案格式撰寫，包含：執行摘要、解決方案說明、定價邏輯，以及為何選擇我們。",
+            en:"You are a sales proposal expert. Help me respond to an RFP from {client_name} requesting {requirement_description}. Our solution is {solution} and our differentiation is {differentiators}. Write in professional proposal format including: executive summary, solution description, pricing rationale, and why choose us.",
+            fields:["客戶名稱","需求描述","我方解決方案","差異化優勢"],
+            fields_en:["client_name","requirement_description","solution","differentiators"] },
+          { id:"coach", label:"指導銷售團隊",
+            zh:"你是一位銷售教練。請為我的銷售團隊設計一套針對【{銷售情境}】的輔導計劃，團隊目前面臨的挑戰是【{挑戰}】，目標是【{目標}】。請提供：技能差距分析框架、每週輔導議程，以及可衡量的進步指標。",
+            en:"You are a sales coach. Design a coaching plan for my sales team on {sales_scenario}. Current challenges: {challenges}. Target: {target_goal}. Provide: skills gap analysis framework, weekly coaching agenda, and measurable progress indicators.",
+            fields:["銷售情境（例：企業大客戶開發）","團隊目前面臨的挑戰","目標（例：Q3達成率120%）"],
+            fields_en:["sales_scenario","challenges","target_goal"] }
+        ]
+      },
+      account_mgr: {
+        label: "客戶經理 Account Manager",
+        tasks: [
+          { id:"call_prep", label:"準備客戶拜訪",
+            zh:"你是一位客戶經理，即將拜訪一位潛在客戶。客戶公司：【{客戶公司}】，聯絡人職位：【{聯絡人職位}】，拜訪目的：【{拜訪目的}】，我方產品/服務：【{產品服務}】。請幫我準備：開場白（30秒）、五個探索性問題、可能遇到的反對意見及回應，以及期望的下一步行動。",
+            en:"You are an account manager preparing for a client visit. Client company: {client_company}. Contact title: {contact_title}. Visit purpose: {visit_purpose}. Our product/service: {product_service}. Prepare: opening statement (30 seconds), five discovery questions, potential objections with responses, and desired next steps.",
+            fields:["客戶公司名稱","聯絡人職位","拜訪目的","我方產品/服務"],
+            fields_en:["client_company","contact_title","visit_purpose","product_service"] },
+          { id:"relationship", label:"建立客戶關係",
+            zh:"你是一位客戶成功專員。請協助我規劃針對【{客戶名稱}】的客戶關係深化計劃，目前關係階段是【{關係階段：新客/成長/成熟}】，客戶產業是【{產業}】，年度合約金額【{合約金額}】。請提供：90 天觸點計劃、加值服務建議，以及擴大合作的機會評估。",
+            en:"You are a customer success specialist. Plan a relationship deepening strategy for {client_name} currently at the {relationship_stage} stage in the {industry} industry with an annual contract of {contract_value}. Provide: 90-day touchpoint plan, value-add service suggestions, and expansion opportunity assessment.",
+            fields:["客戶名稱","關係階段（新客/成長/成熟）","客戶產業","年度合約金額"],
+            fields_en:["client_name","relationship_stage","industry","contract_value"] },
+          { id:"journey", label:"規劃客戶旅程地圖",
+            zh:"你是一位客戶體驗設計師。請為【{產品/服務名稱}】的【{目標客群}】繪製一份客戶旅程地圖，涵蓋從【{起點}】到【{終點}】的完整歷程。請包含：各階段的客戶行動、情緒變化、接觸點，以及我方的機會改善點。",
+            en:"You are a customer experience designer. Map a customer journey for {product_service} targeting {customer_segment} from {start_point} to {end_point}. Include: customer actions, emotional states, touchpoints, and our improvement opportunities at each stage.",
+            fields:["產品/服務名稱","目標客群","旅程起點（例：首次接觸）","旅程終點（例：續約）"],
+            fields_en:["product_service","customer_segment","start_point","end_point"] }
+        ]
+      }
+    }
+  },
+  smb: {
+    label: "小型企業主 Small Business",
+    roles: {
+      owner: {
+        label: "老闆 / 創業者 Owner",
+        tasks: [
+          { id:"pricing", label:"建立定價比較分析",
+            zh:"你是一位商業策略顧問。請協助我分析【{產品/服務名稱}】的定價策略，目前我的定價是【{目前定價}】，主要競品定價如下：【{競品定價資訊}】，目標毛利率是【{目標毛利率}】。請提供：競品定價比較表、我方定價的調整建議，以及不同定價策略（成本加成/競爭導向/價值定價）的分析。",
+            en:"You are a business strategy consultant. Analyze pricing strategy for {product_service}. My current pricing: {current_pricing}. Competitor pricing: {competitor_pricing}. Target gross margin: {target_margin}. Provide: competitor pricing comparison table, pricing adjustment recommendations, and analysis of different pricing strategies (cost-plus/competitive/value-based).",
+            fields:["產品/服務名稱","目前定價","競品定價資訊","目標毛利率"],
+            fields_en:["product_service","current_pricing","competitor_pricing","target_margin"] },
+          { id:"marketing_smb", label:"生成行銷內容",
+            zh:"你是一位小型企業行銷顧問。請為【{業務名稱}】生成一週的社群媒體內容計劃，目標平台【{平台}】，受眾是【{受眾描述}】，業務特色是【{業務特色}】。請提供 7 則貼文，風格【{風格}】，每則附主文與圖片描述建議。",
+            en:"You are a small business marketing consultant. Create a one-week social media content plan for {business_name} on {platform}. Audience: {audience_description}. Business highlights: {business_highlights}. Provide 7 posts in {style} style, each with main copy and image description suggestion.",
+            fields:["業務名稱","目標平台","受眾描述","業務特色","內容風格"],
+            fields_en:["business_name","platform","audience_description","business_highlights","style"] },
+          { id:"competitive_smb", label:"競爭分析（小型企業）",
+            zh:"你是一位商業分析師。請為【{業務名稱}】進行一份競爭分析，我的核心服務是【{核心服務}】，服務地區/市場是【{市場}】，主要競爭對手是【{競爭對手}】。請提供 SWOT 分析、差異化定位建議，以及三個可立即執行的競爭優勢強化策略。",
+            en:"You are a business analyst. Conduct a competitive analysis for {business_name} offering {core_services} in {market}. Main competitors: {competitors}. Provide SWOT analysis, differentiation positioning recommendation, and three immediately actionable strategies to strengthen competitive advantage.",
+            fields:["業務名稱","核心服務","服務市場/地區","主要競爭對手"],
+            fields_en:["business_name","core_services","market","competitors"] },
+          { id:"investor", label:"準備投資人簡報",
+            zh:"你是一位創業顧問。請協助我為【{公司名稱}】準備一份投資人簡報大綱，我們的產品/服務是【{產品服務}】，目標市場是【{目標市場}】，目前里程碑是【{里程碑}】，尋求資金金額【{資金需求}】。請提供完整 Pitch Deck 大綱（10-12頁），每頁的核心訊息，以及投資人最可能問的 5 個問題。",
+            en:"You are a startup advisor. Help me prepare an investor pitch deck outline for {company_name} offering {product_service} in {target_market}. Current milestones: {milestones}. Funding needed: {funding_amount}. Provide a complete pitch deck outline (10-12 slides), core message per slide, and the 5 questions investors will most likely ask.",
+            fields:["公司名稱","產品/服務","目標市場","目前里程碑","資金需求"],
+            fields_en:["company_name","product_service","target_market","milestones","funding_amount"] }
+        ]
+      }
+    }
+  },
+  startup: {
+    label: "新創領導者 Startup Leaders",
+    roles: {
+      founder: {
+        label: "創辦人 Founder",
+        tasks: [
+          { id:"elevator", label:"打造電梯簡報",
+            zh:"你是一位新創顧問。請協助我為【{公司名稱}】打造一段 60 秒的電梯簡報，產品/服務是【{產品服務}】，解決的問題是【{問題描述}】，目標客戶是【{目標客戶}】，差異化是【{差異化}】，目前里程碑是【{里程碑}】。請提供三個版本：面向投資人、面向潛在客戶、面向媒體。",
+            en:"You are a startup advisor. Help me craft a 60-second elevator pitch for {company_name} offering {product_service} that solves {problem_description} for {target_customer}. Differentiation: {differentiation}. Current milestones: {milestones}. Provide three versions: for investors, for potential customers, and for media.",
+            fields:["公司名稱","產品/服務","解決的問題","目標客戶","差異化","目前里程碑"],
+            fields_en:["company_name","product_service","problem_description","target_customer","differentiation","milestones"] },
+          { id:"strategy", label:"頭腦風暴業務策略",
+            zh:"你是一位創業策略顧問。請協助我的新創公司【{公司名稱}】進行業務策略腦力激盪，我們目前的核心挑戰是【{核心挑戰}】，業務目標是【{業務目標}】，可用資源是【{可用資源}】。請提供：5 個潛在策略選項（附優缺點）、3 個快速驗證假設的方式，以及 90 天優先行動清單。",
+            en:"You are a startup strategy consultant. Help brainstorm business strategies for {company_name} facing core challenges of {core_challenges} with goals of {business_goals} and available resources {available_resources}. Provide: 5 strategic options (with pros/cons), 3 quick hypothesis validation methods, and a 90-day priority action list.",
+            fields:["公司名稱","核心挑戰","業務目標","可用資源"],
+            fields_en:["company_name","core_challenges","business_goals","available_resources"] }
+        ]
+      },
+      head_product: {
+        label: "產品負責人 Head of Product",
+        tasks: [
+          { id:"roadmap", label:"制定產品路線圖",
+            zh:"你是一位產品策略師。請協助我為【{產品名稱}】建立一份【{時程}】的產品路線圖，目前產品狀態是【{目前狀態}】，核心用戶需求是【{核心需求}】，業務目標是【{業務目標}】。請提供：功能優先級框架（用 MoSCoW 方法）、每季里程碑，以及功能假設驗證計劃。",
+            en:"You are a product strategist. Create a {timeline} product roadmap for {product_name}. Current state: {current_state}. Core user needs: {core_needs}. Business goal: {business_goal}. Provide: feature prioritization using MoSCoW method, quarterly milestones, and feature hypothesis validation plan.",
+            fields:["產品名稱","路線圖時程（例：2026 H2）","目前產品狀態","核心用戶需求","業務目標"],
+            fields_en:["product_name","timeline","current_state","core_needs","business_goal"] },
+          { id:"launch", label:"制定產品上市計劃",
+            zh:"你是一位產品行銷策略師。請為【{產品名稱}】的【{版本/功能}】上市制定完整 GTM（Go-to-Market）計劃，目標市場【{目標市場}】，上市日期【{上市日期}】，行銷預算【{預算}】。請包含：上市訊息框架、渠道策略、上市前/中/後的行動清單，以及成功指標定義。",
+            en:"You are a product marketing strategist. Create a complete GTM plan for launching {product_name}'s {version_feature} to {target_market} on {launch_date} with a budget of {budget}. Include: launch message framework, channel strategy, pre/during/post-launch action checklist, and success metrics.",
+            fields:["產品名稱","上市版本/功能","目標市場","上市日期","行銷預算"],
+            fields_en:["product_name","version_feature","target_market","launch_date","budget"] }
+        ]
+      },
+      head_ops: {
+        label: "營運負責人 Head of Operations",
+        tasks: [
+          { id:"vendor", label:"與供應商溝通協商",
+            zh:"你是一位採購談判專家。請協助我準備與【{供應商名稱}】的合約協商，我方需求是【{需求描述}】，目前報價是【{目前報價}】，期望目標是【{期望目標}】，我方籌碼是【{我方籌碼}】。請提供：談判策略、五個關鍵條款的立場建議，以及最壞情況的應對方案。",
+            en:"You are a procurement negotiation expert. Help me prepare for contract negotiations with {vendor_name}. Our needs: {requirement_description}. Current quote: {current_quote}. Target: {target_goal}. Our leverage: {our_leverage}. Provide: negotiation strategy, position recommendations for five key terms, and worst-case contingency plan.",
+            fields:["供應商名稱","需求描述","目前報價","期望目標","我方籌碼"],
+            fields_en:["vendor_name","requirement_description","current_quote","target_goal","our_leverage"] }
+        ]
+      }
+    }
+  }
+};
+
+// ══ 格式對照 ══
+const fmtMap = {
+  "": "", bullet:"以條列式重點呈現結果。",
+  table:"以表格格式呈現，欄位清楚標示。",
+  para:"以段落文字呈現，邏輯流暢。",
+  email:"以電子郵件格式呈現，包含主旨、稱呼、正文與結尾。",
+  slide:"以簡報大綱格式呈現，標示每頁標題與核心重點。",
+  json:"以 JSON 格式輸出，欄位名稱使用英文。"
+};
+
+let promptLang = 'zh';
+
+// ══ 初始化 ══
+function init() {
+  // 官方範本庫：填入部門選單
+  const deptSel = document.getElementById('sel-dept');
+  Object.entries(DB).forEach(([k,v]) => {
+    const opt = document.createElement('option');
+    opt.value = k; opt.textContent = v.label;
+    deptSel.appendChild(opt);
+  });
+
+  // 視覺提示詞：紋理 chip 點擊切換
+  document.querySelectorAll('.tex-chip').forEach(chip => {
+    chip.addEventListener('click', function() { this.classList.toggle('active'); });
+  });
+}
+
+function onDeptChange() {
+  const dept = DB[document.getElementById('sel-dept').value];
+  const roleSel = document.getElementById('sel-role');
+  const taskSel = document.getElementById('sel-task');
+  roleSel.innerHTML = '<option value="">— 選擇角色 —</option>';
+  taskSel.innerHTML = '<option value="">— 先選角色 —</option>';
+  roleSel.disabled = !dept;
+  taskSel.disabled = true;
+  document.getElementById('ctx-wrapper').style.display = 'none';
+  if (!dept) return;
+  Object.entries(dept.roles).forEach(([k,v]) => {
+    const opt = document.createElement('option');
+    opt.value = k; opt.textContent = v.label;
+    roleSel.appendChild(opt);
+  });
+  roleSel.disabled = false;
+}
+
+function onRoleChange() {
+  const deptKey = document.getElementById('sel-dept').value;
+  const roleKey = document.getElementById('sel-role').value;
+  const taskSel = document.getElementById('sel-task');
+  taskSel.innerHTML = '<option value="">— 選擇任務 —</option>';
+  taskSel.disabled = true;
+  document.getElementById('ctx-wrapper').style.display = 'none';
+  if (!roleKey) return;
+  const role = DB[deptKey].roles[roleKey];
+  role.tasks.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t.id; opt.textContent = t.label;
+    taskSel.appendChild(opt);
+  });
+  taskSel.disabled = false;
+}
+
+function onTaskChange() {
+  const deptKey = document.getElementById('sel-dept').value;
+  const roleKey = document.getElementById('sel-role').value;
+  const taskId = document.getElementById('sel-task').value;
+  if (!taskId) { document.getElementById('ctx-wrapper').style.display = 'none'; return; }
+  const task = DB[deptKey].roles[roleKey].tasks.find(t => t.id === taskId);
+  const fields = document.getElementById('ctx-fields');
+  fields.innerHTML = '';
+  const fList = promptLang === 'zh' ? task.fields : task.fields_en;
+  fList.forEach((f, i) => {
+    const div = document.createElement('div');
+    div.className = 'ctx-field';
+    div.innerHTML = `<label>${f}</label><input type="text" id="ctx-${i}" placeholder="${f}">`;
+    fields.appendChild(div);
+  });
+  document.getElementById('ctx-wrapper').style.display = 'block';
+}
+
+function setLang(lang, el) {
+  promptLang = lang;
+  document.querySelectorAll('#panel-official .chip-row .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  // 重新渲染欄位（如果已選任務）
+  const taskId = document.getElementById('sel-task').value;
+  if (taskId) onTaskChange();
+}
+
+function genOfficial() {
+  const deptKey = document.getElementById('sel-dept').value;
+  const roleKey = document.getElementById('sel-role').value;
+  const taskId = document.getElementById('sel-task').value;
+  if (!deptKey || !roleKey || !taskId) { toast('請完成部門 → 角色 → 任務的選擇'); return; }
+
+  const task = DB[deptKey].roles[roleKey].tasks.find(t => t.id === taskId);
+  let tpl = promptLang === 'zh' ? task.zh : task.en;
+  const fList = promptLang === 'zh' ? task.fields : task.fields_en;
+
+  // 替換 placeholder：按欄位順序逐一替換第一個佔位符
+  // 空值 fallback 為 [欄位名稱]，方便使用者識別哪裡還沒填
+  fList.forEach((f, i) => {
+    const val = document.getElementById('ctx-' + i)?.value.trim() || `[${f}]`;
+    if (promptLang === 'zh') {
+      tpl = tpl.replace(/【\{[^}]+\}】/, val);
+    } else {
+      tpl = tpl.replace(/\{[^}]+\}/, val);
+    }
+  });
+
+  // 加入格式指令
+  const fmt = document.getElementById('sel-fmt').value;
+  if (fmt && fmtMap[fmt]) {
+    tpl += promptLang === 'zh'
+      ? `\n\n請${fmtMap[fmt]}`
+      : `\n\n${fmtMap[fmt]}`;
+  }
+
+  const out = document.getElementById('out-off');
+  const empty = document.getElementById('out-empty-off');
+  out.textContent = tpl;
+  out.style.display = 'block';
+  empty.style.display = 'none';
+}
+
+function resetOfficial() {
+  document.getElementById('sel-dept').value = '';
+  document.getElementById('sel-role').innerHTML = '<option value="">— 先選部門 —</option>';
+  document.getElementById('sel-role').disabled = true;
+  document.getElementById('sel-task').innerHTML = '<option value="">— 先選角色 —</option>';
+  document.getElementById('sel-task').disabled = true;
+  document.getElementById('ctx-wrapper').style.display = 'none';
+  document.getElementById('sel-fmt').value = '';
+  document.getElementById('out-off').style.display = 'none';
+  document.getElementById('out-empty-off').style.display = 'flex';
+}
+
+// ══ 視覺提示詞 ══
+
+// C · 光線對應句
+const lightingMap = {
+  holo:    '全息投影的光暈效果，核心區域透出冷藍白光，形成層次分明的深度感，以營造未來科技的臨場氛圍',
+  neon:    '霓虹邊緣發光效果，飽和光源從邊緣透出並向外暈散，搭配冷色調高光強化對比，提供強烈的視覺張力',
+  lava:    '熔岩裂隙光源效果，裂縫邊緣透出炙熱橘紅光芒，向周圍暈散熱能光暈，傳遞地底原始能量的視覺衝擊',
+  prism:   '稜鏡折射的七色光譜條紋，模擬白光通過稜鏡後的分光效果，疊加焦散水晶折射紋理，呈現光學奇觀的科學美感',
+  ambient: '均勻環境漫射光覆蓋全版，無戲劇性明暗對比，確保整體亮度一致，提供穩定且專業的視覺基調',
+  quantum: '量子粒子自發光閃爍效果，粒子碰撞點透出微光並帶拖尾動態感，展現科學前沿的神秘深邃氛圍'
+};
+
+// D · 構圖對應句
+const compositionMap = {
+  left40:  '構圖採右側主視覺、左側留白策略，左側 40% 保留深色負空間，供文字、數據與核心資訊排版使用',
+  left50:  '構圖採右側焦點、左側極寬留白策略，左側 50% 保留深色負空間，供主標題、副標與重點觀點清晰陳列',
+  right40: '構圖採左側主視覺、右側留白策略，右側 40% 保留深色負空間，供文字、數據與核心資訊排版使用',
+  center:  '視覺焦點集中於畫面中央，能量由核心向四周漸層消散，形成強烈向心力構圖，四邊保留足夠的暗色邊距',
+  full:    '視覺元素均勻分布全版，整體對比度一致，任何區域均可安全放置前景內容，邊緣 5% 設為安全留邊'
+};
+
+// C · 高光陰影對應句
+const shadowMap = {
+  cold:    '提供對比強烈的冷色調高光，核心亮點以藍白冷光收尾，四周邊緣施以深邃陰影壓縮視覺重心，形成前後分明的層次感',
+  warm:    '提供溫暖色調的局部高光點綴，柔和暈染核心區域，四周施以漸暗暈影向外消散，增添自然的深度立體感',
+  natural: '光線自光源核心向外自然衰減，無額外強調高光或陰影，保留最真實的漸層過渡層次',
+  none:    ''
+};
+
+function genVisual() {
+  const usecase  = document.getElementById('vis-usecase').value.trim();
+  const primary  = document.getElementById('vis-primary').value.trim();
+  const accent   = document.getElementById('vis-accent').value.trim();
+  const gradient = document.getElementById('vis-gradient').value;
+  const textures = [...document.querySelectorAll('.tex-chip.active')].map(c => c.dataset.val);
+  const lighting = document.getElementById('vis-lighting').value;
+  const shadow   = document.getElementById('vis-shadow').value;
+  const comp     = document.getElementById('vis-composition').value;
+  const aesthetic= document.getElementById('vis-aesthetic').value;
+  const res      = document.getElementById('vis-res').value;
+  const ratio    = document.getElementById('vis-ratio').value;
+  const ais      = [...document.querySelectorAll('.ai-vis-chip.active')].map(c => c.textContent.trim());
+
+  if (!usecase) { document.getElementById('vis-usecase').focus(); toast('請填入使用場景描述'); return; }
+
+  // ── 組裝各段句子 ──
+
+  // 開頭
+  const opening = `生成一個高品質的${usecase}`;
+
+  // 色彩段
+  let colorPart = '';
+  if (primary && accent) {
+    colorPart = `以${primary}與${accent}漸層作為主色調`;
+    if (gradient) colorPart += `，${gradient}`;
+  } else if (primary) {
+    colorPart = `以${primary}為主色調`;
+    if (gradient) colorPart += `，${gradient}`;
+  } else if (accent) {
+    colorPart = `以${accent}為強調色`;
+  }
+
+  // 紋理段
+  let texPart = '';
+  if (textures.length === 1) {
+    texPart = `融入微隱的${textures[0]}紋理，透明度控制在 10–20%，增加視覺深度`;
+  } else if (textures.length >= 2) {
+    const last = textures[textures.length - 1];
+    const rest = textures.slice(0, -1).join('、');
+    texPart = `融入微隱的${rest}與${last}紋理，透明度控制在 10–20%，多層疊加增加視覺深度與層次感`;
+  }
+
+  // 光線段
+  const lightPart = lightingMap[lighting] || '';
+
+  // 構圖段
+  const compPart = compositionMap[comp] || '';
+
+  // 高光陰影段
+  const shadowPart = shadowMap[shadow] || '';
+
+  // 美學段
+  const aestheticPart = `讓整體呈現${aesthetic}設計美學`;
+
+  // 技術規格段
+  const techPart = `支持${res}解析度，比例為${ratio}`;
+
+  // 功能需求段（永遠附加）
+  const funcPart = '確保背景底圖不干擾前景色塊與資訊閱讀';
+
+  // ── 串接成完整提示詞 ──
+  const parts = [opening];
+  if (colorPart)   parts.push(colorPart);
+  if (texPart)     parts.push(texPart);
+  if (lightPart)   parts.push(`添加${lightPart}`);
+  if (compPart)    parts.push(compPart);
+  if (shadowPart)  parts.push(shadowPart);
+  parts.push(aestheticPart);
+  parts.push(techPart);
+  parts.push(funcPart);
+
+  let prompt = parts.join('，') + '。';
+
+  // Midjourney 參數行
+  if (ais.includes('Midjourney')) {
+    prompt += `\n\n--ar ${ratio} --style raw --v 6.1 --quality 2`;
+  }
+
+  const out = document.getElementById('out-vis');
+  out.textContent = prompt;
+  out.style.display = 'block';
+  document.getElementById('out-empty-vis').style.display = 'none';
+}
+
+function resetVisual() {
+  document.getElementById('vis-usecase').value = '';
+  document.getElementById('vis-primary').value = '';
+  document.getElementById('vis-accent').value = '';
+  document.getElementById('vis-gradient').value = '';
+  document.querySelectorAll('.tex-chip').forEach(c => c.classList.remove('active'));
+  document.getElementById('vis-lighting').value = 'holo';
+  document.getElementById('vis-shadow').value = 'cold';
+  document.getElementById('vis-composition').value = 'left40';
+  document.getElementById('vis-aesthetic').value = '科技極簡主義';
+  document.getElementById('out-vis').style.display = 'none';
+  document.getElementById('out-empty-vis').style.display = 'flex';
+}
+
+// ══ 通用工具 ══
+function switchPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  el.classList.add('active');
+}
+
+function switchGen(name, el) {
+  document.querySelectorAll('.gen-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.gen-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  el.classList.add('active');
+}
+
+function copyOut(boxId, btnId) {
+  const text = document.getElementById(boxId)?.textContent;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById(btnId);
+    btn.classList.add('ok');
+    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>已複製`;
+    toast('已複製到剪貼簿');
+    setTimeout(() => {
+      btn.classList.remove('ok');
+      btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>複製`;
+    }, 2000);
+  });
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+init();
+</script>
+</body>
+</html>

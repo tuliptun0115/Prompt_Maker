@@ -1,0 +1,441 @@
+# NotebookLM 簡報背景提示詞集合
+# 場景：NotebookLM 知識型簡報底圖，供商業受眾使用
+# 比例：16:9，支援深色與淺色前景文字
+# 生成日期：2026-05-02
+# 參考原始範例：霓虹青科技極簡風格（使用者提供）
+
+collection:
+  title: "NotebookLM 簡報背景提示詞集合"
+  use_case: "NotebookLM 知識型簡報底圖，16:9，商業受眾"
+  created: "2026-05-02"
+  total_prompts: 7
+  source_reference: "使用者原始範例：深邃黑+霓虹青科技極簡風格"
+
+prompts:
+
+  # ─────────────────────────────────────────────────────────────
+  - category_id: "A"
+    prompt:
+      meta:
+        category: "A - 色彩系統"
+        style_name: "暗夜熔岩雙色對比"
+        use_case: "NotebookLM 16:9 簡報背景"
+        ai_target:
+          - "Claude"
+          - "Gemini"
+          - "Midjourney"
+      visual:
+        color_system:
+          primary: "深邃黑 #090909"
+          accent: "熔岩橘紅 #FF4500"
+          secondary: "暗炭灰 #1A1A1A"
+          gradient:
+            direction: "由右下至左上"
+            description: "黑到深炭，右下角浮現熔岩橘紅光暈"
+          palette_type: "互補色（高對比）"
+        texture:
+          elements:
+            - "細密六角形蜂巢網格"
+            - "熔岩裂隙紋路"
+          opacity: "微隱（8-12%）"
+          scale: "微型六角格 + 中型裂隙"
+          blend_mode: "疊加（Overlay）"
+        lighting:
+          type: "熔岩地縫發光"
+          effects:
+            - "右下角橘紅光源暈散"
+            - "裂隙邊緣炙熱光線"
+            - "深邃頂部陰影"
+          mood: "原始力量感、地核熱能"
+          intensity: "局部強烈，其餘暗沉"
+        composition:
+          layout: "右側熱能，左側冷靜留白"
+          focal_point: "右下三分之一"
+          negative_space: "左側 45% 深黑空間（放置核心數據）"
+          depth_layers: "前景裂隙 / 中景網格 / 背景深黑漸層"
+      style:
+        aesthetic: "工業熔岩美學"
+        era: "近未來工業"
+        mood:
+          - "原始"
+          - "強烈"
+          - "炙熱"
+          - "深沉"
+      technical:
+        resolution: "8K"
+        aspect_ratio: "16:9"
+        color_profile: "sRGB"
+        midjourney_params: "--ar 16:9 --style raw --v 6.1 --quality 2 --chaos 15"
+      functional:
+        foreground_compatibility: "左側留白區對比度高，白色與冷灰文字清晰可讀"
+        safe_zones: "邊緣 5% 不放關鍵元素，右下光暈區避免重要文字"
+        text_color_suggestion: "白色 #FFFFFF 或淺灰 #E8E8E8"
+      natural_language: |
+        生成一個高品質的暗色抽象背景簡報，以深邃黑為主底色，右下角浮現熔岩橘紅（#FF4500）的地縫光源暈散效果，形成強烈的互補色對比。融入微隱的細密六角蜂巢網格紋理，疊加中型熔岩裂隙肌理，透明度控制在 10% 以下，增添地質結構的視覺層次。光線設計以局部熔岩熱能為焦點，裂隙邊緣透出炙熱橘光，頂部保持深沉陰影壓制視覺重心。構圖採右側熱能、左側冷靜留白策略，左側 45% 保留深黑負空間供文字與數據使用。整體呈現工業熔岩美學，傳遞原始力量與地核熱能的視覺衝擊，支持 8K 解析度，比例 16:9，確保背景不干擾前景白色文字閱讀。
+
+  # ─────────────────────────────────────────────────────────────
+  - category_id: "B"
+    prompt:
+      meta:
+        category: "B - 材質紋理"
+        style_name: "液態金屬微織物"
+        use_case: "NotebookLM 16:9 簡報背景"
+        ai_target:
+          - "Claude"
+          - "Gemini"
+          - "Midjourney"
+      visual:
+        color_system:
+          primary: "鎢絲銀 #C8C8C8"
+          accent: "鈷藍 #1E3A8A"
+          background: "深鐵灰 #111827"
+          gradient:
+            direction: "中心放射"
+            description: "深鐵灰底，中心浮現液態銀白光澤"
+          palette_type: "類比色（冷靜專業）"
+        texture:
+          elements:
+            - "液態金屬流動波紋"
+            - "金屬編織微纖維"
+            - "奈米尺度菱形格"
+          opacity: "半透明（25-40%）"
+          scale: "大型流動波紋 + 微型菱形格疊加"
+          blend_mode: "濾色（Screen）"
+        lighting:
+          type: "金屬反射環境光"
+          effects:
+            - "液態金屬高光反射"
+            - "纖維交叉點微光閃爍"
+            - "邊緣漸暗暈影"
+          mood: "精密科技、奢華材質感"
+          intensity: "中等均勻，模擬工業照明"
+        composition:
+          layout: "中心對稱放射"
+          focal_point: "畫面中心偏上三分之一"
+          negative_space: "四角暗化處理（留給頁碼與LOGO）"
+          depth_layers: "前景菱形格 / 中景纖維 / 背景流波"
+      style:
+        aesthetic: "液態金屬精密工業"
+        era: "近未來高科技"
+        mood:
+          - "精密"
+          - "奢華"
+          - "冷靜"
+          - "科技"
+      technical:
+        resolution: "8K"
+        aspect_ratio: "16:9"
+        color_profile: "DCI-P3"
+        midjourney_params: "--ar 16:9 --style raw --v 6.1 --quality 2"
+      functional:
+        foreground_compatibility: "中性銀灰底色對深色與淺色文字均有良好對比"
+        safe_zones: "四角暈暗處理避免元素遮蓋，中心上方 60% 為主要內容區"
+        text_color_suggestion: "深藍 #1E3A8A 或白色 #FFFFFF"
+      natural_language: |
+        生成一個精密工業質感的抽象背景簡報，深鐵灰（#111827）為底，中心浮現液態金屬流動波紋，模擬鎢絲銀（#C8C8C8）在工業照明下的反射光澤。紋理層次豐富：大型流動波紋作為主視覺，細密金屬編織微纖維作為中層，奈米尺度菱形格作為最底層肌理，三層半透明疊加（25-40%）形成立體材質感。光線設計模擬金屬環境光，纖維交叉點產生微光閃爍，四邊緣施以漸暗暈影壓縮視覺邊界。整體呈現液態金屬精密工業美學，兼具奢華材質感與冷靜科技氛圍。支持 8K 解析度，比例 16:9，中央區域保留足夠對比度供知識型簡報文字覆蓋。
+
+  # ─────────────────────────────────────────────────────────────
+  - category_id: "C"
+    prompt:
+      meta:
+        category: "C - 光線情境"
+        style_name: "稜鏡折射光譜爆裂"
+        use_case: "NotebookLM 16:9 簡報背景"
+        ai_target:
+          - "Claude"
+          - "Gemini"
+          - "Midjourney"
+      visual:
+        color_system:
+          primary: "深空黑 #050508"
+          accent: "稜鏡全光譜（紅橙黃綠藍紫）"
+          background: "深空黑底"
+          gradient:
+            direction: "由左上角發散"
+            description: "光源點在左上，光譜條紋向右下放射"
+          palette_type: "全色譜（稜鏡分光）"
+        texture:
+          elements:
+            - "稜鏡折射光譜條紋"
+            - "光子微粒散佈"
+          opacity: "透明高光（15-30%）"
+          scale: "中型光譜條 + 細小光粒"
+        lighting:
+          type: "稜鏡定向白光折射"
+          effects:
+            - "七色光譜放射條紋"
+            - "焦散（Caustics）水晶折射"
+            - "光粒子飛散拖尾"
+            - "深空黑中光線穿透感"
+          mood: "科學探索、光學奇觀、知識啟發"
+          intensity: "局部高強度，邊緣快速衰減"
+        composition:
+          layout: "左上光源，向右下放射展開"
+          focal_point: "左上三分之一（光源點）"
+          negative_space: "右側 40% 深黑空間（供文字）"
+          depth_layers: "前景光粒子 / 中景光譜條 / 背景深黑"
+      style:
+        aesthetic: "光學物理視覺化"
+        era: "現代科學美學"
+        mood:
+          - "知識感"
+          - "探索"
+          - "光明"
+          - "精確"
+      technical:
+        resolution: "8K"
+        aspect_ratio: "16:9"
+        color_profile: "DCI-P3"
+        midjourney_params: "--ar 16:9 --style raw --v 6.1 --quality 2 --chaos 5"
+      functional:
+        foreground_compatibility: "右側深黑區域對白色文字對比極佳，光譜區域避免放文字"
+        safe_zones: "右側 40% 為文字安全區，左上光源核心區域不放重要內容"
+        text_color_suggestion: "白色 #FFFFFF（右側暗區）"
+      natural_language: |
+        生成一個以光學物理為美學靈感的抽象背景簡報，以深空黑（#050508）為底，左上角設置稜鏡折射光源，向右下方放射出七色光譜條紋，模擬白光通過三稜鏡後的分光效果。添加焦散（Caustics）水晶折射紋理，強化光學奇觀的視覺真實感，同時散佈光子微粒飛散拖尾效果，賦予畫面動態能量感。光線強度在左上光源核心處高度集中，快速向右下衰減至深黑，形成戲劇性的明暗對比。右側 40% 保留深黑負空間，確保知識型簡報的文字內容清晰呈現。整體呈現科學探索與光學知識啟發的視覺語彙，支持 8K 解析度，比例 16:9。
+
+  # ─────────────────────────────────────────────────────────────
+  - category_id: "D"
+    prompt:
+      meta:
+        category: "D - 構圖版式"
+        style_name: "黃金螺旋知識漩渦"
+        use_case: "NotebookLM 16:9 簡報背景"
+        ai_target:
+          - "Claude"
+          - "Gemini"
+          - "Midjourney"
+      visual:
+        color_system:
+          primary: "深靛藍 #0D1B2A"
+          accent: "冰藍白 #B8D4E8"
+          secondary: "星塵紫 #2D1B69"
+          gradient:
+            direction: "螺旋放射"
+            description: "從畫面右側三分之一處螺旋向外擴散"
+          palette_type: "類比深色（靛藍到星塵紫）"
+        texture:
+          elements:
+            - "費波那契螺旋線條"
+            - "等比例方格框架"
+            - "粒子流沿螺旋路徑"
+          opacity: "透明幾何（20-35%）"
+          scale: "大型螺旋 + 細線等比方格"
+        lighting:
+          type: "螺旋中心發光"
+          effects:
+            - "螺旋核心白藍光暈"
+            - "沿螺旋線條的冰藍發光"
+            - "外圍漸進暗化"
+          mood: "數學之美、知識秩序、宇宙結構"
+          intensity: "中心強，外圍柔和消散"
+        composition:
+          layout: "黃金螺旋構圖（螺旋點在右側三分之一）"
+          focal_point: "右側三分之一螺旋核心"
+          negative_space: "左側 50% 保留給主標題與重點"
+          depth_layers: "前景螺旋線 / 中景等比方格 / 背景深靛藍"
+      style:
+        aesthetic: "數學幾何宇宙觀"
+        era: "永恆（無時代感）"
+        mood:
+          - "秩序"
+          - "數學美"
+          - "宇宙感"
+          - "深沉"
+      technical:
+        resolution: "8K"
+        aspect_ratio: "16:9"
+        color_profile: "sRGB"
+        midjourney_params: "--ar 16:9 --style raw --v 6.1 --quality 2"
+      functional:
+        foreground_compatibility: "左側深靛藍區域對白色與冰藍文字對比良好"
+        safe_zones: "左側 50% 為主要內容區，螺旋核心右側三分之一不放文字"
+        text_color_suggestion: "白色 #FFFFFF 或冰藍白 #B8D4E8"
+      natural_language: |
+        生成一個以費波那契黃金螺旋為構圖核心的抽象背景簡報，深靛藍（#0D1B2A）為底，螺旋核心設置於畫面右側三分之一黃金點，向外擴散冰藍白（#B8D4E8）的螺旋發光線條。疊加半透明等比例方格框架，強化數學幾何的秩序感，粒子流沿螺旋路徑飄移，賦予靜態結構流動生命力。星塵紫（#2D1B69）點綴中間層次，豐富色調層次。光線從螺旋核心白藍光暈向外柔和消散，強調知識的核心凝聚感。左側保留 50% 深色負空間，供簡報主標題與重要觀點清晰陳列。整體呈現數學之美與宇宙結構的永恆美學，支持 8K 解析度，比例 16:9。
+
+  # ─────────────────────────────────────────────────────────────
+  - category_id: "E"
+    prompt:
+      meta:
+        category: "E - 設計美學"
+        style_name: "包豪斯幾何現代主義"
+        use_case: "NotebookLM 16:9 簡報背景"
+        ai_target:
+          - "Claude"
+          - "ChatGPT"
+          - "Midjourney"
+      visual:
+        color_system:
+          primary: "純白 #FFFFFF"
+          accent: "包豪斯紅 #E63946"
+          secondary: "包豪斯黃 #F4D35E"
+          background: "米白 #FAF7F0"
+          gradient:
+            direction: "無漸層（純色平塗）"
+            description: "包豪斯原教旨：平面純色，無漸層"
+          palette_type: "原色三角（紅黃藍對應圓三角方）"
+        texture:
+          elements:
+            - "幾何基本形：圓形、三角形、正方形"
+            - "黑色粗線條框架"
+          opacity: "完全不透明（100%）"
+          scale: "大型幾何形 + 中型線條框架"
+          blend_mode: "正常（Normal）"
+        lighting:
+          type: "均勻平面光（無陰影）"
+          effects:
+            - "無光影效果（包豪斯平面主義）"
+          mood: "理性秩序、功能美學、現代主義"
+          intensity: "完全均勻，無高光"
+        composition:
+          layout: "不對稱幾何平衡"
+          focal_point: "畫面左三分之一大圓形"
+          negative_space: "右側 55% 米白空間（供知識內容）"
+          depth_layers: "單層平面（包豪斯反對透視深度）"
+      style:
+        aesthetic: "包豪斯幾何現代主義（Bauhaus）"
+        era: "1920s 包豪斯精神現代重詮"
+        mood:
+          - "理性"
+          - "功能"
+          - "秩序"
+          - "清晰"
+        references:
+          - "赫伯特·拜耳海報設計"
+          - "Herbert Bayer Universal Typography"
+      technical:
+        resolution: "8K"
+        aspect_ratio: "16:9"
+        color_profile: "sRGB"
+        midjourney_params: "--ar 16:9 --style raw --v 6.1 --quality 2 --chaos 0"
+      functional:
+        foreground_compatibility: "米白背景對黑色文字對比極高，是所有分類中可讀性最佳的"
+        safe_zones: "右側 55% 純米白區域為絕對安全區"
+        text_color_suggestion: "黑色 #1A1A1A 或深灰 #333333"
+      natural_language: |
+        生成一個忠實呈現包豪斯幾何現代主義美學的抽象背景簡報，以米白（#FAF7F0）為底，左側配置大型幾何基本形組合：一個大圓形以包豪斯紅（#E63946）填充，搭配黃色三角形（#F4D35E）與黑色線條正方形框架，三者形成不對稱但視覺平衡的構圖。嚴格遵循包豪斯平面主義原則：純色平塗、無漸層、無陰影、無透視深度，光線完全均勻。黑色粗線條框架強調幾何邊界，賦予作品印刷版畫般的視覺力量。右側保留 55% 米白純粹負空間，供知識型簡報的文字內容以黑色字體清晰陳列，達到形式與功能的完美統一。整體致敬赫伯特·拜耳的平面設計精神，支持 8K 解析度，比例 16:9。
+
+  # ─────────────────────────────────────────────────────────────
+  - category_id: "F"
+    prompt:
+      meta:
+        category: "F - 技術規格"
+        style_name: "8K 超解析度粒子量子場"
+        use_case: "NotebookLM 16:9 簡報背景"
+        ai_target:
+          - "Midjourney"
+          - "Stable Diffusion XL"
+      visual:
+        color_system:
+          primary: "量子深藍 #03045E"
+          accent: "量子青 #00B4D8"
+          secondary: "量子白光 #CAF0F8"
+          gradient:
+            direction: "由下至上"
+            description: "深海藍底，量子場能量由下往上升騰"
+          palette_type: "類比冷色（深藍到冰青）"
+        texture:
+          elements:
+            - "量子糾纏波函數可視化"
+            - "高密度粒子場（每平方毫米 200+ 個光點）"
+            - "干涉條紋"
+          opacity: "微透（5-15%）"
+          scale: "超微型粒子群（充分發揮 8K 高解析度優勢）"
+          blend_mode: "加亮（Add）"
+        lighting:
+          type: "量子場自發光"
+          effects:
+            - "粒子碰撞閃爍點"
+            - "波函數干涉紋路發光"
+            - "底部深藍到頂部量子白的能量升騰"
+          mood: "量子物理、微觀宇宙、科學前沿"
+          intensity: "均勻微弱，局部粒子碰撞點閃亮"
+        composition:
+          layout: "垂直能量流動（由下而上）"
+          focal_point: "畫面下方三分之一能量密集區"
+          negative_space: "上方 50% 稀疏粒子場（供標題）"
+          depth_layers: "前景碰撞閃爍 / 中景粒子場 / 背景波函數"
+      style:
+        aesthetic: "量子物理可視化"
+        era: "當代科學美學 2025+"
+        mood:
+          - "精密"
+          - "微觀"
+          - "前沿"
+          - "深邃"
+      technical:
+        resolution: "8K（7680×4320px，充分展現粒子細節）"
+        aspect_ratio: "16:9"
+        color_profile: "DCI-P3"
+        midjourney_params: "--ar 16:9 --style raw --v 6.1 --quality 2 --chaos 8 --weird 500"
+      functional:
+        foreground_compatibility: "上方稀疏粒子區對白色文字可讀性佳，下方密集區避免重要文字"
+        safe_zones: "上方 50% 稀疏區為文字安全區"
+        contrast_ratio: "文字對比度 ≥ 4.5:1（需在量子青底上使用深藍或白色文字）"
+        text_color_suggestion: "純白 #FFFFFF 或量子白光 #CAF0F8"
+      natural_language: |
+        生成一個以量子物理為靈感的超高清抽象背景，充分發揮 8K（7680×4320px）解析度優勢，呈現量子深藍（#03045E）底色上每平方毫米密佈超過 200 個光子粒子的量子場景觀。量子青（#00B4D8）波函數干涉條紋以 5-15% 透明度疊加，粒子碰撞點產生自發光閃爍效果，干涉紋路可見的細節精度在 8K 解析度下達到極致。能量場由下向上升騰，底部粒子密集聚集，頂部漸轉稀疏，形成自然的視覺層次引導。整體呈現量子物理微觀宇宙的科學前沿美學，上方 50% 稀疏粒子區保留足夠對比度供簡報標題與重要文字使用。支持 8K 超高清解析度，DCI-P3 廣色域，比例 16:9。
+
+  # ─────────────────────────────────────────────────────────────
+  - category_id: "G"
+    prompt:
+      meta:
+        category: "G - 功能性需求"
+        style_name: "無障礙設計漸層安全底圖"
+        use_case: "NotebookLM 16:9 簡報背景"
+        ai_target:
+          - "Claude"
+          - "Gemini"
+          - "ChatGPT"
+      visual:
+        color_system:
+          primary: "深藍灰 #1E293B"
+          accent: "清晰白 #F8FAFC"
+          secondary: "中性灰 #334155"
+          gradient:
+            direction: "由左至右"
+            description: "左側深藍灰，右側稍淺深藍灰，形成微妙漸層，絕不影響文字對比"
+          palette_type: "單色系（深藍灰調）"
+        texture:
+          elements:
+            - "極細橫向平行線（1px 寬）"
+            - "微量雜訊顆粒（防止過純色的螢幕摩爾紋）"
+          opacity: "幾乎不可見（3-5%）"
+          scale: "超細，僅防止螢幕顯示問題"
+          blend_mode: "正常（Normal），幾乎透明"
+        lighting:
+          type: "均勻環境光（無方向性）"
+          effects:
+            - "無戲劇性光線效果"
+            - "整體亮度均勻，防止局部對比度問題"
+          mood: "專業穩定、清晰可靠、正式商業"
+          intensity: "完全均勻"
+        composition:
+          layout: "均勻全畫面"
+          focal_point: "無特定焦點（讓前景內容成為焦點）"
+          negative_space: "整個畫面均為可用空間"
+          depth_layers: "單一平面（背景不搶奪注意力）"
+      style:
+        aesthetic: "無障礙商業設計"
+        era: "現代企業標準"
+        mood:
+          - "專業"
+          - "可靠"
+          - "清晰"
+          - "中性"
+        references:
+          - "WCAG 2.1 AA 無障礙標準"
+          - "企業簡報設計最佳實踐"
+      technical:
+        resolution: "8K"
+        aspect_ratio: "16:9"
+        color_profile: "sRGB"
+        midjourney_params: "--ar 16:9 --style raw --v 6.1 --quality 2 --chaos 0"
+      functional:
+        foreground_compatibility: "所有文字顏色均可使用：白、黃、綠、紅均達 WCAG AA 標準（對比度 ≥ 4.5:1）"
+        safe_zones: "整個畫面均為安全區，無需避開任何區域"
+        contrast_ratio: "白色文字對比度：7.5:1（超越 WCAG AA 標準）"
+        text_color_suggestion: "所有顏色均可，建議白色 #FFFFFF 或淡藍 #93C5FD"
+      natural_language: |
+        生成一個以無障礙可用性為最高設計原則的專業簡報背景，深藍灰（#1E293B）為主底色，由左至右施加極微妙的深藍灰漸層變化，視覺差異小到僅在仔細觀察時才能察覺。疊加 3-5% 透明度的極細橫向平行線肌理，配合微量雜訊顆粒防止螢幕摩爾紋，確保任何顯示設備呈現品質穩定。光線完全均勻，無任何戲劇性光影效果，確保整個畫面對比度一致。設計決策以 WCAG 2.1 AA 無障礙標準為依歸，白色文字（#FFFFFF）在此背景上對比度達 7.5:1，遠超最低標準。整個畫面均可安全放置任何顏色的前景元素，是所有分類中功能可靠性最高的底圖選擇。支持 8K 解析度，sRGB 色域，比例 16:9。

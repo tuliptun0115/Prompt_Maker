@@ -1,0 +1,17 @@
+# AI Meta-data
+.claude/
+.gemini/
+.codex/
+.ag_skill_hub/
+.brain/
+
+# IDE settings
+.vscode/
+.idea/
+
+# Large files
+*.pdf
+
+# OS files
+Thumbs.db
+.DS_Store
