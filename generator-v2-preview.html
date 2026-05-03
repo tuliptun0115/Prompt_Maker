@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+    <title>NotebookLM 資訊圖表Prompt生成器 2.0 - 預覽版</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #0b0d11;
+            --card-bg: #161a23;
+            --card-hover: #1f2430;
+            --accent: #00d4aa;
+            --accent-glow: rgba(0, 212, 170, 0.2);
+            --text: #ffffff;
+            --text-muted: #8b949e;
+            --border: #2d333b;
+            --radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 40px;
+            background: rgba(11, 13, 17, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-main {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .logo-sub {
+            font-size: 10px;
+            color: var(--accent);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+
+        .nav-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .nav-btn.active {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+            font-weight: 600;
+        }
+
+        .nav-btn:hover:not(.active) {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        /* Main Layout */
+        main {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr) 1.2fr;
+            gap: 20px;
+            padding: 30px 40px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2 span {
+            color: var(--accent);
+        }
+
+        /* Column Styles */
+        .column {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            max-height: 600px;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .item:hover {
+            background: var(--card-hover);
+            border-color: rgba(0, 212, 170, 0.3);
+        }
+
+        .item.active {
+            background: rgba(0, 212, 170, 0.1);
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .item i {
+            width: 20px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .item.active i {
+            color: var(--accent);
+        }
+
+        .item-text {
+            font-size: 14px;
+        }
+
+        .badge-rec {
+            margin-left: auto;
+            font-size: 10px;
+            background: var(--accent);
+            color: var(--bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        /* Custom Input Area */
+        .custom-input-box {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .custom-input-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        textarea {
+            width: 100%;
+            background: #0b0d11;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text);
+            font-size: 13px;
+            resize: none;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        textarea:focus {
+            border-color: var(--accent);
+        }
+
+        /* Output Area */
+        .output-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .output-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .output-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+
+        .copy-btn:hover {
+            background: var(--card-hover);
+            border-color: var(--accent);
+        }
+
+        .prompt-content {
+            font-size: 15px;
+            color: #e6edf3;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            min-height: 100px;
+            word-break: break-all;
+        }
+
+        .cta-btn {
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            padding: 18px;
+            border-radius: var(--radius);
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: var(--transition);
+            margin-top: auto;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 212, 170, 0.3);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <i class="fa-solid fa-brain" style="font-size: 32px; color: var(--accent);"></i>
+        <div class="logo-box">
+            <div class="logo-main">NotebookLM 資訊圖表Prompt生成器 2.0</div>
+            <div class="logo-sub">Professional Visual Assistant</div>
+        </div>
+    </div>
+    <div class="nav-btns">
+        <button class="nav-btn active">Prompt生成器</button>
+        <button class="nav-btn">資訊圖表範例圖庫</button>
+        <button class="nav-btn">官方10種風格預覽</button>
+    </div>
+</header>
+
+<main>
+    <!-- Column 1: 需求類型 -->
+    <section class="column">
+        <h2><span>1.</span> 需求類型</h2>
+        <div class="item-list" id="req-list">
+            <div class="item active" data-value="行銷懶人包">
+                <i class="fa-solid fa-bolt"></i>
+                <span class="item-text">行銷懶人包</span>
+            </div>
+            <div class="item" data-value="數據分析報告">
+                <i class="fa-solid fa-chart-line"></i>
+                <span class="item-text">數據分析報告</span>
+            </div>
+            <div class="item" data-value="流程邏輯說明">
+                <i class="fa-solid fa-diagram-project"></i>
+                <span class="item-text">流程邏輯說明</span>
+            </div>
+            <div class="item" data-value="教育知識科普">
+                <i class="fa-solid fa-book-open"></i>
+                <span class="item-text">教育知識科普</span>
+            </div>
+            <div class="item" data-value="專業研究報告">
+                <i class="fa-solid fa-file-contract"></i>
+                <span class="item-text">專業研究報告</span>
+            </div>
+            <div class="item" data-value="歷史演進時間">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span class="item-text">歷史演進時間</span>
+            </div>
+        </div>
+        <div class="custom-input-box">
+            <span class="custom-input-label">客製化需求 / AI 助理 (AI ASSISTANT)</span>
+            <textarea placeholder="輸入客製化需求，AI 會自動優化指令..." rows="3"></textarea>
+        </div>
+    </section>
+
+    <!-- Column 2: 推薦風格 -->
+    <section class="column">
+        <h2><span>2.</span> 推薦風格</h2>
+        <div class="item-list" id="style-list">
+            <div class="item" data-value="可愛粉嫩風格">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span class="item-text">可愛粉嫩風格</span>
+            </div>
+            <div class="item" data-value="黑板粉筆風格">
+                <i class="fa-solid fa-chalkboard"></i>
+                <span class="item-text">黑板粉筆風格</span>
+            </div>
+            <div class="item" data-value="手繪塗鴉風格">
+                <i class="fa-solid fa-pen-nib"></i>
+                <span class="item-text">手繪塗鴉風格</span>
+            </div>
+            <div class="item active" data-value="企業曼非斯風格">
+                <i class="fa-solid fa-briefcase"></i>
+                <span class="item-text">企業曼非斯風格</span>
+                <span class="badge-rec">推薦</span>
+            </div>
+            <div class="item" data-value="白板馬克筆風格">
+                <i class="fa-solid fa-marker"></i>
+                <span class="item-text">白板馬克筆風格</span>
+            </div>
+            <div class="item" data-value="數據儀表板風">
+                <i class="fa-solid fa-gauge-high"></i>
+                <span class="item-text">數據儀表板風</span>
+            </div>
+            <div class="item" data-value="復古報紙風格">
+                <i class="fa-solid fa-newspaper"></i>
+                <span class="item-text">復古報紙風格</span>
+            </div>
+            <div class="item" data-value="盲盒公仔風">
+                <i class="fa-solid fa-box-open"></i>
+                <span class="item-text">盲盒公仔風</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Column 3: 佈局結構 -->
+    <section class="column">
+        <h2><span>3.</span> 佈局結構 (可選)</h2>
+        <div class="item-list" id="layout-list">
+            <div class="item" data-value="不指定佈局">
+                <i class="fa-solid fa-border-none"></i>
+                <span class="item-text">不指定佈局</span>
+            </div>
+            <div class="item" data-value="中心對焦">
+                <i class="fa-solid fa-bullseye"></i>
+                <span class="item-text">中心對焦</span>
+            </div>
+            <div class="item active" data-value="蛇形流程">
+                <i class="fa-solid fa-route"></i>
+                <span class="item-text">蛇形流程</span>
+                <span class="badge-rec">推薦</span>
+            </div>
+            <div class="item" data-value="左右對比">
+                <i class="fa-solid fa-columns"></i>
+                <span class="item-text">左右對比</span>
+            </div>
+            <div class="item" data-value="網格矩陣">
+                <i class="fa-solid fa-table-cells"></i>
+                <span class="item-text">網格矩陣</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Output Area -->
+    <section class="output-column">
+        <div class="output-card">
+            <div class="output-header">
+                <span class="output-label"><i class="fa-solid fa-bolt"></i> Output prompt</span>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <div class="output-header">
+                    <span class="output-label">繁體中文指令</span>
+                    <button class="copy-btn" onclick="copyText('zh-output')"><i class="fa-regular fa-copy"></i> 複製</button>
+                </div>
+                <div class="prompt-content" id="zh-output">
+                    正在生成中...
+                </div>
+            </div>
+
+            <div>
+                <div class="output-header">
+                    <span class="output-label">ENGLISH COMMAND</span>
+                    <button class="copy-btn" onclick="copyText('en-output')"><i class="fa-regular fa-copy"></i> 複製</button>
+                </div>
+                <div class="prompt-content" id="en-output">
+                    Generating...
+                </div>
+            </div>
+        </div>
+
+        <button class="cta-btn">
+            <i class="fa-solid fa-paper-plane"></i> 前往 NotebookLM
+        </button>
+    </section>
+</main>
+
+<script>
+    const config = {
+        req: {
+            '行銷懶人包': { zh: '資訊圖表設計。適用於行銷懶人包場景，強調視覺吸引力與重點傳達。', en: 'Infographic design for marketing summaries. Emphasizes visual appeal and key point delivery.' },
+            '數據分析報告': { zh: '資訊圖表設計。適用於數據分析報告，強調圖表專業度與數據可視化細節。', en: 'Infographic design for data analysis reports. Emphasizes professional charting and data visualization details.' },
+            '流程邏輯說明': { zh: '資訊圖表設計。適用於流程邏輯說明，強調步驟清晰度與邏輯連貫。', en: 'Infographic design for process and logic explanations. Emphasizes step clarity and logical consistency.' },
+            '教育知識科普': { zh: '資訊圖表設計。適用於教育知識科普，強調趣味性與淺顯易懂的視覺元素。', en: 'Infographic design for educational outreach. Emphasizes fun and easy-to-understand visual elements.' },
+            '專業研究報告': { zh: '資訊圖表設計。適用於專業研究報告，強調嚴謹結構與深度資訊展示。', en: 'Infographic design for professional research papers. Emphasizes rigorous structure and in-depth information display.' },
+            '歷史演進時間': { zh: '資訊圖表設計。適用於歷史演進時間軸，強調時間順序與階段性視覺區隔。', en: 'Infographic design for historical timelines. Emphasizes chronological order and staged visual separation.' }
+        },
+        style: {
+            '可愛粉嫩風格': { zh: '視覺風格：採用「可愛粉嫩風格」，配色柔和，使用圓潤的插圖與溫暖的色調。', en: 'Visual style: "Cute and Pastel Style", featuring soft colors, rounded illustrations, and warm tones.' },
+            '黑板粉筆風格': { zh: '視覺風格：採用「黑板粉筆風格」，深色背景配上手繪粉筆質感，具備手感與教育感。', en: 'Visual style: "Chalkboard Style", dark background with hand-drawn chalk textures, organic and educational feel.' },
+            '手繪塗鴉風格': { zh: '視覺風格：採用「手繪塗鴉風格」，具備強烈的手寫線條感，風格活潑不拘。', en: 'Visual style: "Hand-drawn Doodle Style", with strong handwritten lines and a lively, informal atmosphere.' },
+            '企業曼非斯風格': { zh: '視覺風格：採用「企業曼非斯風格」，結合幾何圖形與高飽和配色，呈現現代科技與商業新創感。', en: 'Visual style: "Corporate Memphis Style", combining geometric shapes with high-saturation colors for a modern tech and startup vibe.' },
+            '白板馬克筆風格': { zh: '視覺風格：採用「白板馬克筆風格」，白色簡潔背景配合馬克筆線條與標註感。', en: 'Visual style: "Whiteboard Marker Style", clean white background with marker lines and annotation feel.' },
+            '數據儀表板風': { zh: '視覺風格：採用「數據儀表板風」，深色高科技介面，具備發光元件與精密的數據儀表感。', en: 'Visual style: "Data Dashboard Style", dark high-tech interface with glowing components and precision instrumentation feel.' },
+            '復古報紙風格': { zh: '視覺風格：採用「復古報紙風格」，米色舊紙質背景，單色或低飽和配色，具備歷史質感。', en: 'Visual style: "Vintage Newspaper Style", beige aged paper background, monochrome or low-saturation colors with historical texture.' },
+            '盲盒公仔風': { zh: '視覺風格：採用「盲盒公仔風」，具備 3D 立體質感，色彩明亮且具備玩具收藏感。', en: 'Visual style: "Blind Box Toy Style", featuring 3D volumetric textures, bright colors, and a toy collection aesthetic.' }
+        },
+        layout: {
+            '不指定佈局': { zh: '佈局結構：由 AI 自行發揮最佳排版。', en: 'Layout: AI-driven optimal arrangement.' },
+            '中心對焦': { zh: '佈局結構：採用「中心對焦」，核心概念在中央，資訊向外發散擴張。', en: 'Layout: "Central Focus", core concept in the center with information radiating outwards.' },
+            '蛇形流程': { zh: '佈局結構：採用「蛇形流程」，適合步驟說明與循序演進的導引。', en: 'Layout: "Snake Flow", suitable for step-by-step instructions and sequential progression.' },
+            '左右對比': { zh: '佈局結構：採用「左右對比」，適合優缺點或不同方案的平行比較。', en: 'Layout: "Side-by-Side Comparison", suitable for pros/cons or parallel comparisons of different solutions.' },
+            '網格矩陣': { zh: '佈局結構：採用「網格矩陣」，整齊橫豎排列，適合多個同級別資訊的展示。', en: 'Layout: "Grid Matrix", neat rows and columns for displaying multiple peer-level information units.' }
+        }
+    };
+
+    function updateOutput() {
+        const req = document.querySelector('#req-list .item.active').dataset.value;
+        const style = document.querySelector('#style-list .item.active')?.dataset.value || '企業曼非斯風格';
+        const layout = document.querySelector('#layout-list .item.active')?.dataset.value || '不指定佈局';
+
+        const zh = `${config.req[req].zh} ${config.layout[layout].zh} ${config.style[style].zh} 畫面簡約、無邊框線，呈現科技新創的極簡感。`;
+        const en = `${config.req[req].en} ${config.layout[layout].en} ${config.style[style].en} Minimalist design, no outlines, tech startup aesthetic.`;
+
+        document.getElementById('zh-output').innerText = zh;
+        document.getElementById('en-output').innerText = en;
+    }
+
+    // Init click events
+    document.querySelectorAll('.item').forEach(item => {
+        item.addEventListener('click', function() {
+            this.parentElement.querySelectorAll('.item').forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+            updateOutput();
+        });
+    });
+
+    function copyText(id) {
+        const text = document.getElementById(id).innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('複製成功！');
+        });
+    }
+
+    // Initial run
+    updateOutput();
+</script>
+
+</body>
+</html>

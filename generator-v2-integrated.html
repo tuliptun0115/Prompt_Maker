@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+    <title>My Prompt Maker v2.0 - 雙核心工作站</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #F4F5FA;            /* 極淺薰衣草底色 */
+            --card-bg: #FFFFFF;       /* 純白卡片 */
+            --card-hover: #FDFDFD;
+            --accent-visual: #FF85A1; /* 飽滿櫻花粉 */
+            --accent-gem: #FFD93D;    /* 鵝黃色 */
+            --accent: var(--accent-visual);
+            --accent-glow: rgba(255, 133, 161, 0.15);
+            --text: #1A1C2E;          /* 深藍紫文字 */
+            --text-muted: #6E7191;    /* 灰藍色文字 */
+            --border: #E2E4ED;        /* 淺色邊框 */
+            --radius: 16px;           /* 圓角加大更現代 */
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.04); /* 輕微投影 */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(135deg, #F4F5FA 0%, #FFFFFF 100%);
+            background-attachment: fixed;
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Module Theme Switching */
+        body.mode-gem {
+            --accent: var(--accent-gem);
+            --accent-glow: rgba(180, 94, 255, 0.2);
+        }
+
+        /* Header & Navigation */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 40px 60px 10px 60px; /* 加大間距，避免貼邊 */
+        }
+
+        .logo-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-main {
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            color: var(--text);
+            /* 確保 Emoji 能正確顯示的字體堆疊 */
+            font-family: 'Inter', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+        }
+
+        .logo-sub {
+            font-size: 12px;
+            color: var(--accent);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .module-switcher {
+            display: flex;
+            background: rgba(0, 0, 0, 0.03);
+            padding: 4px;
+            border-radius: 50px;
+            gap: 5px;
+        }
+
+        .module-btn {
+            padding: 8px 20px;
+            border-radius: 50px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+            transition: var(--transition);
+        }
+
+        .module-btn.active {
+            background: var(--card-bg);
+            color: var(--accent);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Layout */
+        .grid-main {
+            display: grid;
+            grid-template-columns: 1fr 420px; 
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 60px 40px 60px; /* 加大左右邊距 */
+            align-items: start;
+        }
+
+        /* 內容區域容器 */
+        .content-area {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* 模組內容區域 - 預設隱藏 */
+        .module-content {
+            display: none;
+        }
+
+        /* 視覺模組特有的內部分欄 */
+        #module-visual.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        /* Gem 模組單欄即可 */
+        #module-gem.active {
+            display: block;
+        }
+
+        /* 輸出區域固定在右側 */
+        .output-column {
+            position: sticky;
+            top: 30px;
+            height: calc(100vh - 60px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .column {
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            margin: 0 0 20px 0;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text);
+            display: block; /* 回到純文字塊狀佈局 */
+        }
+
+        /* Selectors & Chips */
+        .section-label {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+        }
+
+        .chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .chip {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .chip:hover {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .chip.active {
+            background: var(--accent-glow);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Form Elements */
+        textarea {
+            width: 100%;
+            background: #FFFFFF;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            padding: 15px;
+            font-size: 15px;
+            line-height: 1.6;
+            resize: none; /* 禁用手動拉伸，保持版型穩定 */
+            height: 160px; /* 固定高度，優化第一畫面展示 */
+            box-sizing: border-box;
+            transition: var(--transition);
+        }
+
+        textarea:focus { 
+            border-color: var(--accent); 
+            outline: none;
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        /* Output View */
+        .output-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            padding: 6px 15px;
+            font-size: 12px;
+            font-weight: 700;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .prompt-box {
+            background: #F8F9FB;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 14px;
+            color: var(--text);
+            white-space: pre-wrap;
+            height: 320px; /* 固定高度，確保下方的複製按鈕在第一屏可見 */
+            overflow-y: auto;
+            position: relative;
+            transition: var(--transition);
+            margin-bottom: 20px;
+        }
+
+        .copy-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .copy-btn {
+            background: #FFFFFF;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .copy-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px var(--accent-glow);
+        }
+
+        .action-btn {
+            background: var(--accent);
+            color: #FFFFFF;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+            box-shadow: 0 8px 25px var(--accent-glow);
+        }
+
+        /* Hide modules */
+        .module-content { display: none; }
+        .module-content.active { display: block; }
+        #module-visual.active { display: grid; }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1A1C2E;
+            color: #FFFFFF;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 700;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="toast">已複製到剪貼簿！</div>
+
+<header>
+    <div class="header-left">
+        <div class="logo-box">
+            <div class="logo-main">✨ My Prompt Maker</div>
+            <div class="logo-sub" id="logo-sub-text">Visual Studio</div>
+        </div>
+    </div>
+    <div class="module-switcher">
+        <button class="module-btn active" onclick="switchModule('visual')">
+            🎨 簡報風格
+        </button>
+        <button class="module-btn" onclick="switchModule('gem')">
+            💎 Gem 鑄造爐
+        </button>
+    </div>
+</header>
+
+<main class="grid-main">
+    <!-- 左側設定區域 -->
+    <div class="content-area">
+        <!-- Visual Module Content -->
+        <div id="module-visual" class="module-content active">
+            <section class="card">
+                <h2>🧬 簡報美學 DNA</h2>
+                
+                <div class="input-group" style="margin-bottom: 20px;">
+                    <span class="section-label">A. 色彩系統</span>
+                    <div class="chip-group" data-category="color">
+                        <div class="chip active" data-value="深邃黑與霓虹青">深邃黑/霓虹青</div>
+                        <div class="chip" data-value="高質感冷灰色調">冷灰色調</div>
+                        <div class="chip" data-value="暖陽木質配色">暖陽木質</div>
+                        <div class="chip" data-value="極簡白與寶石藍">白/寶石藍</div>
+                    </div>
+                </div>
+
+                <div class="input-group" style="margin-bottom: 20px;">
+                    <span class="section-label">B. 材質紋理 (多選)</span>
+                    <div class="chip-group" data-category="texture">
+                        <div class="chip" data-value="數據網格">數據網格</div>
+                        <div class="chip active" data-value="微型晶片路徑">微型晶片</div>
+                        <div class="chip" data-value="磨砂玻璃質感">磨砂玻璃</div>
+                        <div class="chip" data-value="流體漸層">流體漸層</div>
+                    </div>
+                </div>
+
+                <div class="input-group" style="margin-bottom: 20px;">
+                    <span class="section-label">C. 光線情境</span>
+                    <div class="chip-group" data-category="light">
+                        <div class="chip active" data-value="全息投影光暈">全息投影</div>
+                        <div class="chip" data-value="戲劇化側光">戲劇側光</div>
+                        <div class="chip" data-value="柔和環境漫射">柔和漫射</div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <span class="section-label">D. 構圖版式</span>
+                    <div class="chip-group" data-category="layout">
+                        <div class="chip active" data-value="左側大面積留白">左側留白</div>
+                        <div class="chip" data-value="極簡中心對焦">中心對焦</div>
+                        <div class="chip" data-value="三段式層次佈局">三段層次</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>🛠️ 設計與規格 (E-G)</h2>
+                
+                <div class="input-group" style="margin-bottom: 20px;">
+                    <span class="section-label">E. 整體美學風格</span>
+                    <div class="chip-group" data-category="aesthetic">
+                        <div class="chip active" data-value="科技極簡主義">科技極簡</div>
+                        <div class="chip" data-value="新未來主義">新未來主義</div>
+                        <div class="chip" data-value="包豪斯現代風">包豪斯</div>
+                        <div class="chip" data-value="賽博龐克風格">賽博龐克</div>
+                    </div>
+                </div>
+
+                <div class="input-group" style="margin-bottom: 20px;">
+                    <span class="section-label">F. 比例與解析度</span>
+                    <div class="chip-group" data-category="spec">
+                        <div class="chip active" data-value="16:9, 8K解析度">16:9 (簡報)</div>
+                        <div class="chip" data-value="1:1, 4K解析度">1:1 (正方形)</div>
+                        <div class="chip" data-value="9:16, 4K解析度">9:16 (手機)</div>
+                    </div>
+                </div>
+
+                <div class="input-group" style="margin-bottom: 20px;">
+                    <span class="section-label">G. 功能性約束</span>
+                    <textarea id="visual-custom" placeholder="例如：背景不得干擾標題可讀性、避開右下角Logo區域..." rows="4"></textarea>
+                </div>
+
+                <div class="input-group">
+                    <span class="section-label">MIDJOURNEY 選項</span>
+                    <label style="font-size: 13px; display: flex; align-items: center; gap: 8px; color: var(--text-muted);">
+                        <input type="checkbox" id="mj-params" checked> 附加 MJ 參數 (--style raw --v 6.1)
+                    </label>
+                </div>
+            </section>
+        </div>
+
+        <!-- Gem Module Content -->
+        <div id="module-gem" class="module-content">
+            <section class="card">
+                <h2>💡 Gem 創意描述</h2>
+                <div class="input-group">
+                    <span class="section-label">我想做一個什麼樣的 Gem？</span>
+                    <textarea id="gem-input" placeholder="例如：一個幫我翻譯商務郵件、調整語氣且能修正語法的專家..." rows="10"></textarea>
+                </div>
+                
+                <div class="section-label" style="margin-top: 20px;">快速角色預設 (選填)</div>
+                <div class="chip-group" data-category="gem-preset">
+                    <div class="chip" onclick="applyGemPreset('翻譯專家', '能精準翻譯中英商務郵件，具備禮貌且專業的語氣，並修正語法錯誤。')">翻譯專家</div>
+                    <div class="chip" onclick="applyGemPreset('簡報顧問', '協助拆解簡報架構，針對視覺化提供具體建議，並優化內文文案。')">簡報顧問</div>
+                    <div class="chip" onclick="applyGemPreset('數據分析師', '分析原始數據，提取關鍵趨勢，並以商業簡報規格產出摘要。')">數據分析師</div>
+                    <div class="chip" onclick="applyGemPreset('SEO作家', '撰寫吸引人的標題與內文，並自動加入關鍵字優化搜尋排名。')">SEO作家</div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- 右側輸出區域 (統一固定) -->
+    <section class="column output-column">
+        <div class="card" style="height: 100%;">
+            <div id="output-header-visual">
+                <h2>📤 輸出分流</h2>
+                <div class="output-tabs" style="display: none;">
+                    <button class="tab-btn active" onclick="switchOutput('claude')">Claude (XML)</button>
+                    <button class="tab-btn" onclick="switchOutput('gemini')">Gemini (MD)</button>
+                    <button class="tab-btn" onclick="switchOutput('chatgpt')">ChatGPT (POWER)</button>
+                </div>
+            </div>
+            
+            <div id="output-header-gem" style="display: none;">
+                <h2>🚀 Gemini 官方建議輸出</h2>
+                <div class="section-label">Gem Instructions (Instructions 欄位)</div>
+            </div>
+
+            <div class="prompt-box" id="output-main">正在生成指令...</div>
+            
+            <button class="action-btn" id="copy-btn-main" onclick="copyResult('output-main')">
+                📋 複製產出指令
+            </button>
+        </div>
+    </section>
+</main>
+
+<script>
+    let currentModule = 'visual';
+    let currentOutputPlatform = 'claude';
+
+    // --- Core Logic ---
+    function updateAll() {
+        if (currentModule === 'visual') updateVisualOutput();
+        else updateGemOutput();
+    }
+
+    // 視覺風格 - 細緻化自然語言生成
+    function updateVisualOutput() {
+        const selections = {};
+        document.querySelectorAll('#module-visual .chip-group').forEach(group => {
+            const cat = group.dataset.category;
+            const activeChips = Array.from(group.querySelectorAll('.chip.active')).map(c => c.dataset.value);
+            selections[cat] = activeChips;
+        });
+
+        const custom = document.getElementById('visual-custom').value;
+        const addMJ = document.getElementById('mj-params').checked;
+
+        // 映射詳細描述詞 - 深化美學 DNA
+        const descriptions = {
+            color: selections.color[0] === '深邃黑與霓虹青' ? '使用深遂黑和霓紅青色(neon cyan)漸層作為主色調，營造出高對比且具電磁感的光影氛圍' : 
+                   selections.color[0] === '高質感冷灰色調' ? '採用高質感冷灰色調，透過多層次的銀灰與炭灰過渡，營造出低調且奢華的專業感' :
+                   selections.color[0] === '暖陽木質配色' ? '以暖陽木質配色為核心，融合淺楓木與奶油白，傳達溫暖、有機且具親和力的視覺印象' : '採用極簡白與寶石藍配色，運用高明度色彩分布，展現明亮、專業且極具清晰感的設計風格',
+            
+            texture: selections.texture.map(t => {
+                if(t === '數據網格') return '微發光的幾何數據網格點陣';
+                if(t === '微型晶片路徑') return '微隱且精密排列的方形微型晶片電路圖騰';
+                if(t === '磨砂玻璃質感') return '高質感的半透明磨砂玻璃層次 (Frosted Glassmorphism)';
+                if(t === '流體漸層') return '具備絲滑動感的流體漸層線條';
+                return t;
+            }).join('與'),
+
+            light: selections.light[0] === '全息投影光暈' ? '添加全息投影的彩色衍射光暈效果，增加畫面的空氣感與未來感' :
+                   selections.light[0] === '戲劇化側光' ? '提供對比強烈的 45 度戲劇化側光，深度刻畫材質表面的細微起伏' : '採用柔和的 32-bit 環境漫射光，確保視覺效果平穩、平衡且不刺眼',
+
+            layout: selections.layout[0] === '左側大面積留白' ? '左側保留 60% 以上的深負空間 (Negative Space)，以便放置核心數據與重點文字' :
+                    selections.layout[0] === '極簡中心對焦' ? '採用極簡中心對焦佈局，將所有視覺張力集中在中心點，產生強烈匯聚感' : '使用三段式黃金比例層次佈局，優雅地分配視覺權重與資訊深度',
+
+            aesthetic: selections.aesthetic[0] === '科技極簡主義' ? '採用科技極簡主義 (Tech Minimalism)，強調純淨的材質、精準的直線與極致的專業感' :
+                       selections.aesthetic[0] === '新未來主義' ? '展現新未來主義 (Neo-Futurism) 美學，融入仿生流線型、動態流動感與前瞻性的技術想像' :
+                       selections.aesthetic[0] === '包豪斯現代風' ? '融合包豪斯 (Bauhaus) 美學，以基本幾何形狀為構圖基礎，強調「形式追隨功能」的平衡美感' : '呈現賽博龐克 (Cyberpunk) 的強烈視覺衝擊，結合低彩度背景與高對比的霓虹光源，展現華麗與頹廢並存的張力',
+
+            spec: (selections.spec[0] || '').includes('16:9') ? '比例為 16:9，支援 8K 高清解析度與超細緻渲染' :
+                  (selections.spec[0] || '').includes('1:1') ? '比例為 1:1，支援 4K 高清解析度與攝影等級細節' : '比例為 9:16 垂直比例，支援 4K 高清解析度'
+        };
+
+        // 組裝純粹但具備專業身分的「風格規範」描述
+        let narrative = `你是一位精通視覺設計與品牌美學的專家。請基於以下【簡報視覺風格規範】，為我建立一套專業的視覺系統：
+
+● 美學定調：${descriptions.aesthetic}
+● 核心配色：${descriptions.color}
+● 視覺元素：融入${descriptions.texture}
+● 光影氛圍：${descriptions.light}
+● 版面佈局：${descriptions.layout}
+● 輸出規格：${descriptions.spec}`;
+        
+        if (custom) narrative += `\n● 特別要求：${custom}`;
+        narrative += `\n\n(註：所有背景元素需保持簡潔，確保不干擾文字資訊閱讀。核心目標是建立一致且具質感的視覺體驗。)`;
+
+        // 視覺模組現在直接輸出具備專家身分的純淨內容
+        const outputElem = document.getElementById('output-main');
+        if (outputElem) outputElem.innerText = narrative;
+    }
+
+    // 只有 Gem 模組或其他需要時才使用封裝
+    function wrapByPlatform(content, platform) {
+        // 視覺模組目前已跳過此函數，保留給 Gem 或未來擴充使用
+        return content;
+    }
+
+    // Gem 鑄造爐邏輯
+    function updateGemOutput() {
+        const input = document.getElementById('gem-input').value;
+        if (!input) {
+            const outputElem = document.getElementById('output-main');
+            if (outputElem) outputElem.innerText = '請在左側輸入您的想法...';
+            return;
+        }
+
+        const gemPrompt = `你是一位資深的指令工程 (Prompt Engineering) 專家，擅長根據用戶需求建立高效、精準且具備強大邏輯的 AI 角色。
+
+請依照以下架構為我鑄造一個高品質的 Gemini Gem：
+
+### [角色定義 (Role)]
+你是一位精通「${input.split('、')[0] || '專業領域'}」的頂尖專家，具備深厚的實務經驗與敏銳的洞察力。
+
+### [核心任務 (Task)]
+- 核心目標：${input}
+- 預期結果：提供準確、具備實踐價值且結構優雅的專業回應。
+
+### [執行指南 (Workflow)]
+1. **意圖分析**：深入理解用戶問題背後的商業背景與核心需求。
+2. **邏輯建構**：檢索相關知識庫並以結構化的方式組織答案。
+3. **品質檢核**：產出前進行最後檢查，確保內容專業且不帶廢話。
+
+### [風格與限制 (Constraints)]
+- 語氣：專業、誠實且具備建設性的溫暖。
+- 禁忌：避免冗長無用的開場白，直接切入問題核心。
+- 語言：一律使用繁體中文。
+
+請將以上設定轉化為此 Gem 的系統指令 (System Instructions)。`;
+
+        const outputElem = document.getElementById('output-main');
+        if (outputElem) outputElem.innerText = gemPrompt;
+    }
+
+    function switchModule(mod) {
+        currentModule = mod;
+        document.body.className = mod === 'gem' ? 'mode-gem' : '';
+        
+        // 更新 Glow 與 Accent 顏色
+        const root = document.querySelector(':root');
+        if (mod === 'gem') {
+            root.style.setProperty('--accent', '#FFD93D');
+            root.style.setProperty('--accent-glow', 'rgba(255, 217, 61, 0.15)');
+            document.getElementById('output-header-visual').style.display = 'none';
+            document.getElementById('output-header-gem').style.display = 'block';
+        } else {
+            root.style.setProperty('--accent', '#FF85A1');
+            root.style.setProperty('--accent-glow', 'rgba(255, 133, 161, 0.15)');
+            document.getElementById('output-header-visual').style.display = 'block';
+            document.getElementById('output-header-gem').style.display = 'none';
+        }
+
+        document.querySelectorAll('.module-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector(`.module-btn[onclick*="${mod}"]`).classList.add('active');
+        document.querySelectorAll('.module-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(`module-${mod}`).classList.add('active');
+        document.getElementById('logo-sub-text').innerText = mod === 'gem' ? 'Gem Forge' : 'Visual Studio';
+        updateAll();
+    }
+
+    function switchOutput(platform) {
+        currentOutputPlatform = platform;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector(`.tab-btn[onclick*="${platform}"]`).classList.add('active');
+        updateAll();
+    }
+
+    function copyResult(id) {
+        const outputElem = document.getElementById(id);
+        if (!outputElem) return;
+        const text = outputElem.innerText;
+        if (text === "請在左側輸入您的想法..." || text === "正在生成指令...") return;
+        
+        navigator.clipboard.writeText(text).then(() => {
+            const toast = document.getElementById('toast');
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2000);
+        });
+    }
+
+    function applyGemPreset(title, desc) {
+        document.getElementById('gem-input').value = desc;
+        updateGemOutput();
+    }
+
+    // Event Listeners for Live Updates
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('chip')) {
+            const group = e.target.closest('.chip-group');
+            if (!group) return;
+
+            const cat = group.dataset.category;
+            if (cat === 'texture') {
+                e.target.classList.toggle('active');
+            } else if (cat !== 'gem-preset') {
+                group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                e.target.classList.add('active');
+            }
+            updateAll();
+        }
+    });
+
+    document.getElementById('visual-custom').addEventListener('input', updateAll);
+    document.getElementById('gem-input').addEventListener('input', updateAll);
+    document.getElementById('mj-params').addEventListener('change', updateAll);
+
+    // Initial load
+    updateAll();
+</script>
+
+</body>
+</html>
