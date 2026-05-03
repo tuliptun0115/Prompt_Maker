@@ -299,10 +299,23 @@ prompts:
 
 ## 更新紀錄
 
+### 2026-05-03 — GitHub 正式發佈與改版紀錄
+
+- **使用工具：** Antigravity (Git, Shell)
+- **做到哪裡：**
+  - **正式發佈：** 專案已成功推送到 GitHub [tuliptun0115/Prompt_Maker](https://github.com/tuliptun0115/Prompt_Maker)。
+  - **安全性強化：** 新增 `robots.txt` 與 `.gitignore`，確保內部工具不被爬蟲索引，並排除 AI 紀錄檔。
+  - **工具改版：** `index.html` 視覺提示詞頁面完成 v1.2 改版，支援 A–F 欄位化輸入與 Midjourney 參數自動生成。
+- **下一步：**
+  - 邀請使用者進行測試，確認視覺提示詞生成的流暢度。
+  - 若有需要，可進一步整合 localStorage 儲存個人自訂模板。
+- **注意事項：**
+  - 公開倉庫已鎖定爬蟲封鎖，部署後應檢查 Vercel/GitHub Pages 是否正確讀取 `robots.txt`。
+
 ### 2026-05-03 — v1.2 視覺提示詞改版
 
 - **使用工具：** Claude Code（Edit、Read）
-- **做到哪裡：** `prompt-generator.html` 視覺提示詞頁面完整改版
+- **做到哪裡：** `index.html` 視覺提示詞頁面完整改版
   - **改版核心：** 從「Meta-Prompt 產生器」改為「直接輸出完整視覺提示詞」
   - 側欄欄位依 A–F 分類拆分為具體設定項：主色、強調色、漸層方向、紋理多選、光線效果、高光陰影、構圖留白、美學風格、解析度/比例
   - 新增紋理 chip 多選（8 種：晶片、數據網格、蜂巢格、電路板、金屬波紋、量子粒子、幾何框架、稜鏡折射）
@@ -329,8 +342,8 @@ prompts:
   - Task 3：`03-YAML輸出格式規範.md` 建立完成
   - Task 4：`examples/notebooklm-簡報背景.yaml` + `.md` 兩種格式均完成（7 分類 A–G）
   - Task 5：`00-README.md` 索引文件建立完成
-  - **額外：** `prompt-generator.html` 網頁工具完成，單一 HTML 檔案，無需伺服器
-- **prompt-generator.html 功能摘要：**
+  - **額外：** `index.html` 網頁工具完成，單一 HTML 檔案，無需伺服器
+- **index.html 功能摘要：**
   - 「官方範本庫」Tab：依據 Gemini for Workspace Prompting Guide 101，內建 10 部門 / 20+ 角色 / 55+ 任務模板（雙語 zh/en）
   - 三層級聯選單（部門 → 角色 → 任務），選完自動產生情境填寫欄位
   - 模板替換後直接輸出可貼入 AI 的 PTCF 格式指令
