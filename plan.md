@@ -299,18 +299,20 @@ prompts:
 
 ## 更新紀錄
 
-### 2026-05-03 — GitHub 正式發佈與改版紀錄
+### 2026-05-03 — GitHub 正式發佈與 GitHub Pages 部署
 
 - **使用工具：** Antigravity (Git, Shell)
 - **做到哪裡：**
   - **正式發佈：** 專案已成功推送到 GitHub [tuliptun0115/Prompt_Maker](https://github.com/tuliptun0115/Prompt_Maker)。
-  - **安全性強化：** 新增 `robots.txt` 與 `.gitignore`，確保內部工具不被爬蟲索引，並排除 AI 紀錄檔。
-  - **工具改版：** `index.html` 視覺提示詞頁面完成 v1.2 改版，支援 A–F 欄位化輸入與 Midjourney 參數自動生成。
+  - **GitHub Pages 部署：** 完成首頁重新命名 (`index.html`) 並成功部署。
+  - **線上工具網址：** [https://tuliptun0115.github.io/Prompt_Maker/](https://tuliptun0115.github.io/Prompt_Maker/)
+  - **安全性強化：** 新增 `robots.txt` 與 `.gitignore`，確保內部工具不被爬蟲索引。
 - **下一步：**
   - 邀請使用者進行測試，確認視覺提示詞生成的流暢度。
   - 若有需要，可進一步整合 localStorage 儲存個人自訂模板。
 - **注意事項：**
-  - 公開倉庫已鎖定爬蟲封鎖，部署後應檢查 Vercel/GitHub Pages 是否正確讀取 `robots.txt`。
+  - 儲存庫已設為 Public 以啟用免費 GitHub Pages。
+  - 部署後已檢查 `robots.txt` 是否正確生效。
 
 ### 2026-05-03 — v1.2 視覺提示詞改版
 
